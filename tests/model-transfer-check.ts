@@ -10,6 +10,7 @@ import {
   isFiveViewModelMessage,
 } from "../src/voxel/fiveViewMessage";
 import { fitSourceToSquare } from "../src/fiveViewAspect";
+import { resizeMaskedImage } from "../src/imagePreprocess";
 import type { VoxelObject } from "../src/voxel/types";
 
 const output = document.querySelector<HTMLPreElement>("#output")!;
@@ -75,6 +76,28 @@ assert(
 assert(
   "Tall source images keep their aspect ratio",
   tallFit.width === 128 && tallFit.height === 256,
+);
+
+const edgeImage = {
+  width: 4,
+  height: 1,
+  data: new Uint8ClampedArray([
+    0, 0, 0, 255,
+    255, 255, 255, 255,
+    255, 255, 255, 255,
+    0, 0, 0, 255,
+  ]),
+};
+const edgeMask = new Uint8Array([255, 0, 0, 255]);
+const edgeResize = resizeMaskedImage(edgeImage, edgeMask, 2);
+assert(
+  "Masked downsampling does not average white background into edges",
+  edgeResize.image.data[0] < 10 &&
+    edgeResize.image.data[1] < 10 &&
+    edgeResize.image.data[2] < 10 &&
+    edgeResize.image.data[4] < 10 &&
+    edgeResize.image.data[5] < 10 &&
+    edgeResize.image.data[6] < 10,
 );
 
 output.textContent = lines.join("\n");

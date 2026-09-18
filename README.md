@@ -21,6 +21,8 @@ npm run dev
 
 各面は初期状態で元画像の縦横比を保持します。調整欄の **縦横比** は100%が元比率で、値を上げると横長、下げると縦長になります。自動整列ボタンで元比率へ戻せます。
 
+写真の処理順は、作業用画像（長辺最大1024px）で背景を先に切り抜き、そのマスクを使って最大512pxへ縮小し、最後に16〜48セルのVoxelへ変換します。マスク付き縮小では背景画素を色平均から除外するため、白背景が輪郭へ混ざって白いドットになるのを抑えます。
+
 この接続は `src/voxel/modelTransfer.ts` の検証付きデータ橋渡しと `src/fiveViewBridge.ts` に分離しています。将来 `.vox`、写真切り抜き、Room Scanを追加する場合も、同じ `VoxelObject` 形式へ変換して渡せます。
 
 ```sh
@@ -70,6 +72,7 @@ npm run preview  # distのローカル確認
 src/
   voxel/types.ts               Voxel / VoxelObjectの公開データ型
   fiveViewAspect.ts            5面図候補を元比率で正方形キャンバスへ収める計算
+  imagePreprocess.ts           マスクを保った縮小と背景色の混入防止
   voxel/generators.ts          重複セルを上書きする簡単なboxビルダーと配色
   scenes/desk.ts               デスク、PC、椅子、植物
   scenes/room.ts               床、2枚の壁、ベッド、机、PC、棚、植物
