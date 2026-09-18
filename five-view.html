@@ -124,6 +124,7 @@
       <button class="btn" id="saveJson">JSONを書き出す</button>
     </div>
     <div class="row">
+      <button class="btn" id="sendGarden" disabled>箱庭へ送る</button>
       <button class="btn" id="savePng">PNGを書き出す</button>
       <button class="btn" id="saveNet">展開図PNG</button>
     </div>
@@ -141,9 +142,10 @@
     <div class="status" id="status">白背景の5面図シートをアップロードしてください。</div>
   </section>
 </main>
+<script type="module" src="./src/fiveViewBridge.ts"></script>
 <script>
 (() => {
-const DEMO_SRC = '/mnt/data/05aff547-5dcc-479e-9a91-9e9032855362(1).png';
+const DEMO_SRC = './five-view-demo.svg';
 const ROLES = ['front','left','right','back','top'];
 const ROLE_LABEL = {front:'Front',left:'Left',right:'Right',back:'Back',top:'Top'};
 const SLOT_SIZE = 110;
@@ -232,16 +234,26 @@ els.file.addEventListener('change', async e => {
 });
 els.useDemo.addEventListener('click', async () => {
   setStatus('サンプル画像を読み込み中…');
-  const img = await urlToImage(DEMO_SRC);
-  state.image = img;
-  els.title.textContent = 'sample 5-view chair';
-  detectCandidatesFromCurrent();
+  try {
+    const img = await urlToImage(DEMO_SRC);
+    state.image = img;
+    els.title.textContent = 'sample garden planter';
+    detectCandidatesFromCurrent();
+  } catch (error) {
+    setStatus(`サンプルを読み込めませんでした。${error instanceof Error ? error.message : String(error)}`);
+  }
 });
 els.detectBtn.addEventListener('click', detectCandidatesFromCurrent);
 els.autoAssign.addEventListener('click', () => { autoAssignRoles(); renderAssignmentUI(); initializeAllTransforms(); drawNet(); renderFinalViews(); });
 els.resetTransforms.addEventListener('click', () => { initializeAllTransforms(); drawNet(); renderFinalViews(); });
 els.centerRole.addEventListener('click', () => { autoFitRole(state.activeRole); syncRoleControls(); drawNet(); renderFinalViews(); });
 els.rebuild3d.addEventListener('click', rebuild3D);
+els.sendGarden.addEventListener('click', () => {
+  if (!state.model || !window.voxcelMyRoomBridge) return;
+  window.voxcelMyRoomBridge.sendVoxelModel(state.model);
+  setStatus('Voxelを箱庭へ渡しました。箱庭を開いています…');
+  window.location.href = './';
+});
 els.saveJson.addEventListener('click', () => {
   if(!state.model) return;
   const blob = new Blob([JSON.stringify(state.model)], {type:'application/json'});
@@ -713,6 +725,7 @@ function rebuild3D(){
   setStatus('色を転写中…');
   state.model = colorize(raw, state.finalViews);
   els.summary.textContent = `${X}×${Y}×${Z} / ${state.model.voxels.length.toLocaleString()} voxels`;
+  els.sendGarden.disabled = false;
   setStatus('完成。右のプレビューを回せます。');
   drawModel();
 }

@@ -33,7 +33,8 @@
 <dialog id="help-dialog" class="help-dialog"><header class="dialog-header"><h2>小さな世界のつくり方</h2><button id="help-close" class="icon-button" aria-label="閉じる">×</button></header><h3>写真 → 切り抜き → ボクセル → 箱庭</h3><p>「写真からつくる」で写真を選び、消す・戻すブラシで被写体を整えます。細かさ・色数・厚みを調整して「素材を箱庭に置く」。左のコレクションをクリックすると同じ素材をもう一度置けます。</p><h3>操作</h3><p>部屋のものをドラッグして移動。矢印キーで微調整、Rキーで回転、Deleteで削除。Ctrl / ⌘ + Zで元に戻せます。向き・大きさは右のパネルでも変更できます。</p><h3>保存とプライバシー</h3><p>箱庭はこのブラウザの保存領域に自動保存します。ブラウザのデータ削除で消えるため「箱庭を書き出す」でJSONを保管してください。写真そのものは保存・送信せず、色付きボクセルを保存します。</p><h3>AIと簡易モードの違い</h3><p>簡易切り抜きは背景色を見て消す処理です。複雑な背景にはブラシかAI切り抜きを使ってください。AIは任意で、初回は外部から実行ライブラリとモデルをダウンロードし、端末内で処理します。切り抜きモデルは約224 MB、深度モデルは約27 MBに加え実行環境の通信が発生します。端末・回線によって時間やメモリを要します。利用料やAPIキーは不要です。</p><p>写真1枚から裏側を正確に復元する機能はありません。顔の専用補正・人物アバター・ARはこのMVPには含みません。サンプル家具は手続き生成、サンプルマグ画像は合成画像です。</p><p class="small muted">描画の参考：yurashu2-droid / VoxcelMyRoom。AI：BiRefNet_lite-ONNX (MIT)、Depth Anything V2 Small (Apache-2.0)、Transformers.js (Apache-2.0)。</p></dialog>
 <div id="toast" class="toast" role="status" aria-live="polite"></div>
 <input id="photo-file" type="file" accept="image/png,image/jpeg,image/webp,image/avif" hidden><input id="camera-file" type="file" accept="image/*" capture="environment" hidden><input id="scene-file" type="file" accept="application/json,.json" hidden><input id="voxel-file" type="file" accept="application/json,.json" hidden>
-<script type="module">const __modules = {};
+<script type="module">import { clearVoxelTransfer, readVoxelTransfer, VOXEL_TRANSFER_KEY } from './src/voxel/modelTransfer.ts';
+const __modules = {};
 // src/core.mjs
 __modules["core"] = (() => {
 /** Pure image-to-voxel processing. No browser, graphics, network or AI dependencies. */
@@ -433,7 +434,7 @@ function renderLibrary(){
   for(const a of garden.assets.filter(a=>!filterPhotos||a.method!=='sample')){
     const button=document.createElement('button');button.className='asset-card';button.dataset.assetId=a.id;button.title=`${a.name} を箱庭に配置`;
     const thumb=document.createElement('span');thumb.className='asset-thumb';const canvas=document.createElement('canvas');thumb.append(canvas);paintRaster(canvas,renderAsset(a,{resolution:80,yaw:25,pitch:25,style:'cubes',outline:false}));
-    const label=document.createElement('span');label.className='asset-label';label.textContent=a.name;const kind=document.createElement('span');kind.className='asset-kind';kind.textContent=a.method==='sample'?'SAMPLE OBJECT':a.method==='depth'?'PHOTO / AI DEPTH':'PHOTO / QUICK';button.append(thumb,label,kind);
+    const label=document.createElement('span');label.className='asset-label';label.textContent=a.name;const kind=document.createElement('span');kind.className='asset-kind';kind.textContent=a.method==='sample'?'SAMPLE OBJECT':a.method==='depth'?'PHOTO / AI DEPTH':a.method==='silhouette'?'5-VIEW / SILHOUETTE':'PHOTO / QUICK';button.append(thumb,label,kind);
     button.addEventListener('click',()=>{try{addExisting(a.id);}catch(e){toast(e.message,true);}});host.append(button);
   }
   if(!host.children.length){const text=document.createElement('p');text.className='small muted';text.style.gridColumn='1 / -1';text.textContent='写真からつくった素材がここに並びます。';host.append(text);}
@@ -442,7 +443,7 @@ function renderInspector(){
   const pair=selectedPair();$('nothing-selected').hidden=!!pair;$('selection-panel').hidden=!pair;
   for(const el of document.querySelectorAll('.asset-card'))el.classList.toggle('selected',pair?.a.id===el.dataset.assetId);
   if(!pair)return;const {p,a}=pair;
-  $('selected-name').textContent=a.name;$('selected-meta').textContent=`${a.voxels.length.toLocaleString()} voxels · ${a.method==='sample'?'サンプル':a.method==='depth'?'AI深度':'簡易立体化'}`;
+  $('selected-name').textContent=a.name;$('selected-meta').textContent=`${a.voxels.length.toLocaleString()} voxels · ${a.method==='sample'?'サンプル':a.method==='depth'?'AI深度':a.method==='silhouette'?'5面図':'簡易立体化'}`;
   $('object-angle').textContent=`${((p.rotation%360)+360)%360}°`;$('scale-range').value=p.scale;$('scale-value').textContent=`${p.scale.toFixed(1)}×`;$('object-x').value=p.x.toFixed(2);$('object-z').value=p.z.toFixed(2);
   paintRaster($('selected-canvas'),renderAsset(a,{resolution:96,yaw:garden.view.yaw-p.rotation,pitch:22.5,style:garden.view.style,outline:true}));
 }
@@ -474,7 +475,7 @@ function normalizeImportedVoxelModel(raw,nameHint='5面図の素材'){
   const size=Array.isArray(raw.size)&&raw.size.length===3?raw.size:(Array.isArray(raw.meta?.dimensions)&&raw.meta.dimensions.length===3?raw.meta.dimensions:null);
   const voxels=sourceVoxels.map(v=>({x:Number(v.x),y:Number(v.y),z:Number(v.z),color:String(v.color||'')}));
   if(voxels.length>60000)throw new Error('素材が大きすぎます。60,000 voxel以下にしてください。');
-  if(voxels.some(v=>!Number.isInteger(v.x)||!Number.isInteger(v.y)||!Number.isInteger(v.z)||v.x<0||v.y<0||v.z<0||!/^#[\\da-f]{6}$/i.test(v.color)))throw new Error('voxel座標または色の形式が不正です。');
+  if(voxels.some(v=>!Number.isInteger(v.x)||!Number.isInteger(v.y)||!Number.isInteger(v.z)||v.x<0||v.y<0||v.z<0||!/^#[\da-f]{6}$/i.test(v.color)))throw new Error('voxel座標または色の形式が不正です。');
   const derived=[0,1,2].map(i=>Math.max(...voxels.map(v=>[v.x,v.y,v.z][i]))+1);
   const dims=(size||derived).map(n=>Math.max(1,Math.round(Number(n)||1)));
   const cells=new Set();
@@ -485,9 +486,29 @@ function normalizeImportedVoxelModel(raw,nameHint='5面図の素材'){
     cells.add(key);
   }
   const palette=[...new Set(voxels.map(v=>v.color))].slice(0,64);
-  const name=String(raw.name||raw.asset?.name||nameHint).replace(/[<>\\u0000-\\u001f]/g,'').trim().slice(0,40)||'5面図の素材';
+  const name=String(raw.name||raw.asset?.name||nameHint).replace(/[<>\u0000-\u001f]/g,'').trim().slice(0,40)||'5面図の素材';
   const height=clamp(dims[1]/12,.14,4);
   return {id:uid(),name,height,size:dims,voxels,palette,method:'silhouette'};
+}
+function addImportedVoxelToGarden(raw,nameHint='5面図の素材',message='Voxel素材を箱庭に追加しました。'){
+  const asset=normalizeImportedVoxelModel(raw,nameHint);
+  const p={id:uid(),assetId:asset.id,x:1.8,z:2.8,rotation:garden.view.yaw,scale:1};
+  validateScene({...garden,assets:[...garden.assets,asset],instances:[...garden.instances,p]});
+  mutate(()=>{garden.assets.push(asset);garden.instances.push(p);selected=p.id;},true);
+  toast(message);
+}
+function consumeTransferredVoxel(){
+  const model=readVoxelTransfer(window.localStorage);
+  if(!model)return false;
+  try{
+    addImportedVoxelToGarden(model,model.name,'5面図のVoxelを箱庭に追加しました。');
+    clearVoxelTransfer(window.localStorage);
+    return true;
+  }catch(error){
+    clearVoxelTransfer(window.localStorage);
+    toast(`Voxelを追加できませんでした。${error.message||String(error)}`,true);
+    return false;
+  }
 }
 safeBind('export-scene',()=>{persist();download(new Blob([JSON.stringify(garden)],{type:'application/json'}),`${fileName(garden.name)}.voxcel.json`);toast('箱庭JSONを書き出しました。写真そのものは含まれません。');});
 safeBind('export-image',()=>pngDownload(renderRoom(garden,640,540,null),`${fileName(garden.name)}.png`,2));
@@ -501,11 +522,7 @@ $('voxel-file').addEventListener('change',async e=>{
   try{
     if(file.size>20*1024*1024)throw new Error('Voxel JSONは20 MB以下にしてください。');
     const raw=JSON.parse(await file.text());
-    const asset=normalizeImportedVoxelModel(raw,file.name.replace(/\\.[^.]+$/,''));
-    const p={id:uid(),assetId:asset.id,x:1.8,z:2.8,rotation:garden.view.yaw,scale:1};
-    validateScene({...garden,assets:[...garden.assets,asset],instances:[...garden.instances,p]});
-    mutate(()=>{garden.assets.push(asset);garden.instances.push(p);selected=p.id;},true);
-    toast('5面図から作った素材を箱庭に追加しました。');
+    addImportedVoxelToGarden(raw,file.name.replace(/\\.[^.]+$/,''),'Voxel素材を箱庭に追加しました。');
   }catch(err){toast(`追加できませんでした。${err.message}`,true);}
 });
 safeBind('undo',undoEdit);safeBind('redo',redoEdit);safeBind('rotate-object-left',()=>changeObject(p=>p.rotation=(p.rotation-45+360)%360));safeBind('rotate-object-right',()=>changeObject(p=>p.rotation=(p.rotation+45)%360));
@@ -598,7 +615,9 @@ safeBind('place-created',()=>{
 });
 new ResizeObserver(()=>{requestRoom();if($('creator').open){fitPhotoCanvases();drawPreview();}}).observe($('room-stage'));
 window.addEventListener('beforeunload',()=>{if(persistTimer)persist();});
+window.addEventListener('storage',event=>{if(event.key===VOXEL_TRANSFER_KEY&&event.newValue)consumeTransferredVoxel();});
 if(storageWarning){$('save-status').textContent='自動保存不可 · JSONを利用';$('save-status').classList.add('warning');}
+consumeTransferredVoxel();
 refresh(true);
 
 return {};
