@@ -146,6 +146,7 @@
 <script>
 (() => {
 const DEMO_SRC = './five-view-demo.svg';
+const embeddedMode = new URLSearchParams(window.location.search).get('embed') === '1' && window.parent !== window;
 const ROLES = ['front','left','right','back','top'];
 const ROLE_LABEL = {front:'Front',left:'Left',right:'Right',back:'Back',top:'Top'};
 const SLOT_SIZE = 110;
@@ -174,6 +175,7 @@ const els = Object.fromEntries([...document.querySelectorAll('[id]')].map(el => 
 function setStatus(msg){ els.status.textContent = msg; }
 function clamp(v,a,b){ return Math.max(a, Math.min(b, v)); }
 function $(id){ return document.getElementById(id); }
+if(embeddedMode) els.sendGarden.textContent = '箱庭に追加';
 function updateLabels(){
   els.thv.textContent = els.threshold.value;
   els.dilv.textContent = els.dilate.value;
@@ -250,7 +252,11 @@ els.centerRole.addEventListener('click', () => { autoFitRole(state.activeRole); 
 els.rebuild3d.addEventListener('click', rebuild3D);
 els.sendGarden.addEventListener('click', () => {
   if (!state.model || !window.voxcelMyRoomBridge) return;
-  window.voxcelMyRoomBridge.sendVoxelModel(state.model);
+  const destination = window.voxcelMyRoomBridge.sendVoxelModel(state.model);
+  if (destination === 'embedded') {
+    setStatus('箱庭へ追加しました。左上の閉じるでツールを終了できます。');
+    return;
+  }
   setStatus('Voxelを箱庭へ渡しました。箱庭を開いています…');
   window.location.href = './';
 });

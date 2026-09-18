@@ -4,6 +4,11 @@ import {
   readVoxelTransfer,
   writeVoxelTransfer,
 } from "../src/voxel/modelTransfer";
+import {
+  createFiveViewModelMessage,
+  FIVE_VIEW_MESSAGE_TYPE,
+  isFiveViewModelMessage,
+} from "../src/voxel/fiveViewMessage";
 import type { VoxelObject } from "../src/voxel/types";
 
 const output = document.querySelector<HTMLPreElement>("#output")!;
@@ -46,6 +51,18 @@ assert(
       model: { name: "bad", voxels: [{ x: 0, y: 0, z: 0, color: "red" }] },
     }),
   ) === null,
+);
+
+const message = createFiveViewModelMessage(model);
+assert(
+  "The embedded five-view message keeps its model",
+  message.type === FIVE_VIEW_MESSAGE_TYPE &&
+    isFiveViewModelMessage(message) &&
+    JSON.stringify(message.model) === JSON.stringify(model),
+);
+assert(
+  "Messages from another shape are rejected",
+  !isFiveViewModelMessage({ type: FIVE_VIEW_MESSAGE_TYPE, model: null }),
 );
 
 output.textContent = lines.join("\n");
