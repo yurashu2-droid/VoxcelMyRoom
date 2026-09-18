@@ -33,7 +33,7 @@ const models = [desk(), room(), asymmetric()];
 let modelIndex = 0;
 let auto = false;
 document.querySelector("#app")!.innerHTML = `
-<header><a class="brand" href="./"><span class="logo">▦</span> VOXEL / PIXEL <small>RENDERING LAB</small></a><span class="tag">VOXEL TO PIXEL</span></header>
+<header><a class="brand" href="./"><span class="logo">▦</span> VOXEL / PIXEL <small>RENDERING LAB</small></a><a class="tag" href="./five-view.html">5-VIEW → VOXEL</a></header>
 <main><section class="workspace"><div class="intro"><div><p class="eyebrow">EXPERIMENT 001 / VOLUME TO SPRITE</p><h1>立体を、ドットで描く。</h1><p class="sub">ひとつのVoxelモデル。すべての角度を、ピクセルに。</p></div><span class="pill">ORTHOGRAPHIC</span></div>
 <div class="modebar" role="group" aria-label="描画モード"><button data-mode="1"><b>01</b> Original 3D</button><button data-mode="2"><b>02</b> Low-res</button><button data-mode="3" class="active"><b>03</b> Pixel Art <span>推奨</span></button></div>
 <div class="stage-wrap"><div class="stage-top"><span id="model-name"></span><span id="resolution-badge"></span></div><div id="stage" aria-label="Voxel表示。ドラッグで回転、ホイールでズーム" tabindex="0"></div><div class="stage-bottom"><span><i class="dot"></i> LIVE VOXEL RENDER</span><span id="angle"></span></div></div>
