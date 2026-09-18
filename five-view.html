@@ -1,0 +1,788 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>5面図 → 簡易Voxel（調整UI付き）</title>
+<style>
+  :root{
+    --bg:#eeece6;--panel:#f8f6f1;--line:#d6d1c7;--text:#27241f;--muted:#736d63;--accent:#4b8b6c;
+    --slot:#ffffff;--slotLine:#cfc8bb;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;height:100%;background:var(--bg);color:var(--text);font:14px/1.45 system-ui, sans-serif}
+  main{display:grid;grid-template-columns:440px 1fr;min-height:100%}
+  aside{background:var(--panel);border-right:1px solid var(--line);padding:18px;overflow:auto}
+  section{display:grid;grid-template-rows:auto 1fr auto;min-width:0}
+  h1{font-size:20px;margin:0 0 8px}
+  h2{font-size:14px;margin:18px 0 8px}
+  p.small,.small{font-size:12px;color:var(--muted)}
+  .mono{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}
+  label{display:block;margin:10px 0 5px;font-weight:600}
+  input[type="range"],select,button,input[type="file"]{width:100%}
+  input[type="checkbox"]{transform:translateY(1px)}
+  .btn{padding:9px 12px;border:1px solid var(--line);background:white;border-radius:10px;cursor:pointer}
+  .btn:hover{border-color:#bfb7aa}
+  .btn.primary{background:var(--accent);color:#fff;border-color:var(--accent)}
+  .row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  .row3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
+  .topbar{padding:12px 14px;border-bottom:1px solid var(--line);display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+  .topbar .small{margin-left:auto}
+  .status{padding:8px 14px;border-top:1px solid var(--line);font-size:12px;color:var(--muted)}
+  #view{display:block;width:100%;height:100%;image-rendering:pixelated;background:#f3f1eb}
+  #netCanvas{width:100%;background:#f2efe8;border:1px solid var(--line);border-radius:12px;display:block}
+  .candidateGrid,.miniGrid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+  .candidate,.mini{border:1px solid var(--line);background:#fff;border-radius:10px;padding:6px}
+  .candidate.active{outline:2px solid var(--accent)}
+  .candidate .cap,.mini .cap{font-size:11px;color:var(--muted);text-align:center;margin-bottom:4px}
+  .candidate canvas,.mini canvas{width:100%;aspect-ratio:1/1;display:block;background:#fff;image-rendering:pixelated}
+  .roles{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+  .roleCard{border:1px solid var(--line);border-radius:10px;background:#fff;padding:8px}
+  .roleCard.active{outline:2px solid var(--accent)}
+  .roleCard h3{margin:0 0 6px;font-size:12px;display:flex;justify-content:space-between;align-items:center}
+  .hint{padding:9px 10px;background:#fff;border:1px dashed var(--line);border-radius:10px;color:var(--muted);font-size:12px}
+  @media(max-width:1080px){main{grid-template-columns:1fr;grid-template-rows:auto 1fr}aside{border-right:0;border-bottom:1px solid var(--line)}}
+  @media(max-width:620px){.candidateGrid,.miniGrid{grid-template-columns:repeat(3,1fr)}.roles{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<main>
+  <aside>
+    <h1>5面図 → 簡易Voxel</h1>
+    <p class="small">任意の5面図シートから <span class="mono">Front / Left / Right / Back / Top</span> を切り出し、<span class="mono">Visual Hull</span> で簡易3D化します。今回は <b>手動で並び替え / 位置調整 / スケール調整</b> できる版です。</p>
+
+    <h2>1. 画像</h2>
+    <input id="file" type="file" accept="image/*" />
+    <div class="row">
+      <button class="btn" id="useDemo" disabled title="サンプル画像はリポジトリに同梱していません">サンプル未同梱</button>
+      <button class="btn" id="detectBtn">候補を再検出</button>
+    </div>
+
+    <h2>2. 検出設定</h2>
+    <label>白背景しきい値 <span id="thv" class="small mono">20</span></label>
+    <input id="threshold" type="range" min="5" max="80" step="1" value="20" />
+
+    <label>膨張補正 <span id="dilv" class="small mono">1</span></label>
+    <input id="dilate" type="range" min="0" max="3" step="1" value="1" />
+
+    <label>最小コンポーネント面積 <span id="minv" class="small mono">800</span></label>
+    <input id="minArea" type="range" min="100" max="5000" step="100" value="800" />
+
+    <h2>3. 候補ビュー</h2>
+    <div class="candidateGrid" id="candidateGrid"></div>
+    <div class="hint">白背景シートから見つけた候補です。役割割り当てで使います。検出順は大きい順。</div>
+
+    <h2>4. 役割の割り当て</h2>
+    <div class="roles" id="roleGrid"></div>
+    <div class="row">
+      <button class="btn" id="autoAssign">自動割り当て</button>
+      <button class="btn" id="resetTransforms">配置を初期化</button>
+    </div>
+
+    <h2>5. 展開図調整</h2>
+    <canvas id="netCanvas" width="600" height="380"></canvas>
+    <p class="small">各スロットをクリックするとその面を選択。スロット内でドラッグすると配置調整できます。</p>
+
+    <div class="row3">
+      <div>
+        <label>編集面</label>
+        <select id="activeRole"></select>
+      </div>
+      <div>
+        <label>X <span id="xv" class="small mono"></span></label>
+        <input id="offsetX" type="range" min="-64" max="64" step="1" value="0" />
+      </div>
+      <div>
+        <label>Y <span id="yv" class="small mono"></span></label>
+        <input id="offsetY" type="range" min="-64" max="64" step="1" value="0" />
+      </div>
+    </div>
+    <div class="row3">
+      <div>
+        <label>Scale <span id="sv" class="small mono"></span></label>
+        <input id="scale" type="range" min="70" max="140" step="1" value="100" />
+      </div>
+      <div>
+        <label>反転</label>
+        <button class="btn" id="flipBtn">左右反転 OFF</button>
+      </div>
+      <div>
+        <label>&nbsp;</label>
+        <button class="btn" id="centerRole">この面を自動整列</button>
+      </div>
+    </div>
+
+    <h2>6. 3D構築</h2>
+    <label>解像度プリセット</label>
+    <select id="preset">
+      <option value="simple">Simple 20 × 36 × 22</option>
+      <option value="medium" selected>Medium 24 × 44 × 26</option>
+      <option value="large">Large 28 × 50 × 30</option>
+    </select>
+    <div class="row">
+      <button class="btn primary" id="rebuild3d">現在の調整で再構築</button>
+      <button class="btn" id="saveJson">JSONを書き出す</button>
+    </div>
+    <div class="row">
+      <button class="btn" id="savePng">PNGを書き出す</button>
+      <button class="btn" id="saveNet">展開図PNG</button>
+    </div>
+
+    <h2>7. 最終ビュー</h2>
+    <div class="miniGrid" id="finalGrid"></div>
+  </aside>
+
+  <section>
+    <div class="topbar">
+      <strong id="title">まだ画像がありません</strong>
+      <span class="small" id="summary"></span>
+    </div>
+    <canvas id="view"></canvas>
+    <div class="status" id="status">白背景の5面図シートをアップロードしてください。</div>
+  </section>
+</main>
+<script>
+(() => {
+const DEMO_SRC = ''; // No bundled sample in repository build.
+const ROLES = ['front','left','right','back','top'];
+const ROLE_LABEL = {front:'Front',left:'Left',right:'Right',back:'Back',top:'Top'};
+const SLOT_SIZE = 110;
+const NORM = 256;
+const NET_SLOTS = {
+  top:   {x:245, y:20,  w:SLOT_SIZE, h:SLOT_SIZE},
+  front: {x:20,  y:205, w:SLOT_SIZE, h:SLOT_SIZE},
+  left:  {x:150, y:205, w:SLOT_SIZE, h:SLOT_SIZE},
+  right: {x:280, y:205, w:SLOT_SIZE, h:SLOT_SIZE},
+  back:  {x:410, y:205, w:SLOT_SIZE, h:SLOT_SIZE},
+};
+
+const state = {
+  image: null,
+  sourceCanvas: null,
+  candidates: [],
+  assignments: {front:null,left:null,right:null,back:null,top:null},
+  transforms: {},
+  activeRole: 'front',
+  finalViews: null,
+  model: null,
+  drag: null,
+};
+
+const els = Object.fromEntries([...document.querySelectorAll('[id]')].map(el => [el.id, el]));
+function setStatus(msg){ els.status.textContent = msg; }
+function clamp(v,a,b){ return Math.max(a, Math.min(b, v)); }
+function $(id){ return document.getElementById(id); }
+function updateLabels(){
+  els.thv.textContent = els.threshold.value;
+  els.dilv.textContent = els.dilate.value;
+  els.minv.textContent = els.minArea.value;
+  const t = state.transforms[state.activeRole];
+  els.xv.textContent = t ? Math.round(t.x) : '-';
+  els.yv.textContent = t ? Math.round(t.y) : '-';
+  els.sv.textContent = t ? (t.scale*100).toFixed(0) + '%' : '-';
+}
+
+function initRoleUI(){
+  const roleGrid = els.roleGrid;
+  roleGrid.innerHTML = '';
+  const activeSel = els.activeRole;
+  activeSel.innerHTML = ROLES.map(r => `<option value="${r}">${ROLE_LABEL[r]}</option>`).join('');
+  for(const role of ROLES){
+    const card = document.createElement('div');
+    card.className = 'roleCard';
+    card.id = `rolecard_${role}`;
+    card.innerHTML = `<h3><span>${ROLE_LABEL[role]}</span><span class="small mono" id="assigned_${role}">-</span></h3>
+      <select id="assign_${role}"></select>`;
+    roleGrid.appendChild(card);
+    card.addEventListener('click', () => setActiveRole(role));
+  }
+}
+initRoleUI();
+
+function roleCardHighlight(){
+  for(const role of ROLES) $(`rolecard_${role}`).classList.toggle('active', role===state.activeRole);
+}
+function setActiveRole(role){
+  state.activeRole = role;
+  els.activeRole.value = role;
+  syncRoleControls();
+  roleCardHighlight();
+  drawNet();
+}
+function syncRoleControls(){
+  const t = state.transforms[state.activeRole];
+  if(!t) return;
+  els.offsetX.value = Math.round(t.x);
+  els.offsetY.value = Math.round(t.y);
+  els.scale.value = Math.round(t.scale*100);
+  els.flipBtn.textContent = `左右反転 ${t.flip ? 'ON' : 'OFF'}`;
+  updateLabels();
+}
+
+els.activeRole.addEventListener('change', e => setActiveRole(e.target.value));
+['threshold','dilate','minArea'].forEach(id => els[id].addEventListener('input', updateLabels));
+['threshold','dilate','minArea'].forEach(id => els[id].addEventListener('change', () => { if(state.image) detectCandidatesFromCurrent(); }));
+els.file.addEventListener('change', async e => {
+  const file = e.target.files && e.target.files[0];
+  if(!file) return;
+  const img = await fileToImage(file);
+  state.image = img;
+  els.title.textContent = file.name;
+  detectCandidatesFromCurrent();
+});
+els.useDemo.addEventListener('click', async () => {
+  if (!DEMO_SRC) return;
+  setStatus('サンプル画像を読み込み中…');
+  const img = await urlToImage(DEMO_SRC);
+  state.image = img;
+  els.title.textContent = 'sample 5-view chair';
+  detectCandidatesFromCurrent();
+});
+els.detectBtn.addEventListener('click', detectCandidatesFromCurrent);
+els.autoAssign.addEventListener('click', () => { autoAssignRoles(); renderAssignmentUI(); initializeAllTransforms(); drawNet(); renderFinalViews(); });
+els.resetTransforms.addEventListener('click', () => { initializeAllTransforms(); drawNet(); renderFinalViews(); });
+els.centerRole.addEventListener('click', () => { autoFitRole(state.activeRole); syncRoleControls(); drawNet(); renderFinalViews(); });
+els.rebuild3d.addEventListener('click', rebuild3D);
+els.saveJson.addEventListener('click', () => {
+  if(!state.model) return;
+  const blob = new Blob([JSON.stringify(state.model)], {type:'application/json'});
+  downloadBlob('voxel_model.json', blob);
+});
+els.savePng.addEventListener('click', () => {
+  const url = els.view.toDataURL('image/png');
+  const a = document.createElement('a'); a.href = url; a.download = 'voxel_preview.png'; a.click();
+});
+els.saveNet.addEventListener('click', () => {
+  const url = els.netCanvas.toDataURL('image/png');
+  const a = document.createElement('a'); a.href = url; a.download = 'fiveview_net.png'; a.click();
+});
+['offsetX','offsetY','scale'].forEach(id => els[id].addEventListener('input', () => {
+  const t = state.transforms[state.activeRole]; if(!t) return;
+  t.x = +els.offsetX.value;
+  t.y = +els.offsetY.value;
+  t.scale = +els.scale.value / 100;
+  updateLabels(); drawNet(); renderFinalViews();
+}));
+els.flipBtn.addEventListener('click', () => {
+  const t = state.transforms[state.activeRole]; if(!t) return;
+  t.flip = !t.flip;
+  els.flipBtn.textContent = `左右反転 ${t.flip ? 'ON' : 'OFF'}`;
+  drawNet(); renderFinalViews();
+});
+els.preset.addEventListener('change', () => { if(state.finalViews) rebuild3D(); });
+
+function downloadBlob(name, blob){
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob); a.download = name; a.click();
+  setTimeout(()=>URL.revokeObjectURL(a.href), 1500);
+}
+function fileToImage(file){
+  const url = URL.createObjectURL(file);
+  return urlToImage(url).finally(() => setTimeout(() => URL.revokeObjectURL(url), 1200));
+}
+function urlToImage(url){
+  return new Promise((resolve,reject) => {
+    const img = new Image();
+    img.onload = () => resolve(img);
+    img.onerror = reject;
+    img.src = url;
+  });
+}
+function imgToCanvas(img){
+  const c = document.createElement('canvas');
+  c.width = img.width; c.height = img.height;
+  c.getContext('2d').drawImage(img,0,0);
+  return c;
+}
+
+function makeMaskFromCanvas(c, applyDilate=true){
+  const ctx = c.getContext('2d');
+  const {data,width,height} = ctx.getImageData(0,0,c.width,c.height);
+  const th = +els.threshold.value;
+  const mask = new Uint8Array(width*height);
+  // If the image really contains transparency, alpha is authoritative.
+  // This prevents white/light-colored object parts from disappearing.
+  let hasTransparency = false;
+  for(let i=3;i<data.length;i+=4){ if(data[i] < 250){ hasTransparency = true; break; } }
+  for(let i=0,p=0;i<data.length;i+=4,p++){
+    const r=data[i],g=data[i+1],b=data[i+2],a=data[i+3];
+    if(hasTransparency){
+      mask[p] = a > 10 ? 1 : 0;
+    } else {
+      const delta = Math.max(255-r,255-g,255-b);
+      mask[p] = (a>10 && delta>th) ? 1 : 0;
+    }
+  }
+  if(applyDilate){
+    const times = +els.dilate.value;
+    for(let i=0;i<times;i++) dilateInPlace(mask,width,height);
+  }
+  return {mask,width,height,hasTransparency};
+}
+function dilateInPlace(mask,w,h){
+  const src = mask.slice();
+  for(let y=1;y<h-1;y++) for(let x=1;x<w-1;x++){
+    const idx = y*w+x;
+    if(src[idx]){ mask[idx] = 1; continue; }
+    mask[idx] = (
+      src[idx-1]||src[idx+1]||src[idx-w]||src[idx+w]||
+      src[idx-w-1]||src[idx-w+1]||src[idx+w-1]||src[idx+w+1]
+    ) ? 1 : 0;
+  }
+}
+function components(mask,w,h,minArea){
+  const visited = new Uint8Array(mask.length);
+  const qx = new Int32Array(mask.length);
+  const qy = new Int32Array(mask.length);
+  const comps = [];
+  for(let y=0;y<h;y++) for(let x=0;x<w;x++){
+    const start = y*w+x;
+    if(!mask[start] || visited[start]) continue;
+    let head=0, tail=0;
+    qx[tail]=x; qy[tail]=y; tail++; visited[start]=1;
+    let minx=x,maxx=x,miny=y,maxy=y, area=0;
+    while(head<tail){
+      const cx=qx[head], cy=qy[head]; head++; area++;
+      if(cx<minx)minx=cx; if(cx>maxx)maxx=cx; if(cy<miny)miny=cy; if(cy>maxy)maxy=cy;
+      const nbs=[[1,0],[-1,0],[0,1],[0,-1]];
+      for(const [dx,dy] of nbs){
+        const nx=cx+dx, ny=cy+dy;
+        if(nx<0||ny<0||nx>=w||ny>=h) continue;
+        const ni=ny*w+nx;
+        if(mask[ni] && !visited[ni]){ visited[ni]=1; qx[tail]=nx; qy[tail]=ny; tail++; }
+      }
+    }
+    if(area>=minArea) comps.push({x:minx,y:miny,w:maxx-minx+1,h:maxy-miny+1,area,cx:(minx+maxx)/2,cy:(miny+maxy)/2});
+  }
+  return comps.sort((a,b)=>b.area-a.area);
+}
+
+function maskBounds(mask,w,h){
+  let minx=w,miny=h,maxx=-1,maxy=-1;
+  for(let y=0;y<h;y++) for(let x=0;x<w;x++){
+    if(!mask[y*w+x]) continue;
+    if(x<minx)minx=x; if(x>maxx)maxx=x; if(y<miny)miny=y; if(y>maxy)maxy=y;
+  }
+  return maxx<0 ? null : {x:minx,y:miny,w:maxx-minx+1,h:maxy-miny+1};
+}
+function isolateAndTightCrop(canvas, mk){
+  const bounds = maskBounds(mk.mask, mk.width, mk.height);
+  if(!bounds) return {canvas, width:canvas.width, height:canvas.height, mask:mk.mask};
+  const out = document.createElement('canvas'); out.width=bounds.w; out.height=bounds.h;
+  const src = canvas.getContext('2d').getImageData(bounds.x,bounds.y,bounds.w,bounds.h);
+  const dst = out.getContext('2d').createImageData(bounds.w,bounds.h);
+  for(let y=0;y<bounds.h;y++) for(let x=0;x<bounds.w;x++){
+    const globalIdx=(bounds.y+y)*mk.width+(bounds.x+x);
+    const si=(y*bounds.w+x)*4;
+    if(mk.mask[globalIdx]){
+      dst.data[si]=src.data[si]; dst.data[si+1]=src.data[si+1]; dst.data[si+2]=src.data[si+2]; dst.data[si+3]=255;
+    } else {
+      dst.data[si+3]=0;
+    }
+  }
+  out.getContext('2d').putImageData(dst,0,0);
+  const tightMask = makeMaskFromCanvas(out, false);
+  return {canvas:out, width:out.width, height:out.height, mask:tightMask.mask};
+}
+function cropFromSource(sourceCanvas, box, pad=8){
+  const x = clamp(Math.floor(box.x-pad), 0, sourceCanvas.width-1);
+  const y = clamp(Math.floor(box.y-pad), 0, sourceCanvas.height-1);
+  const w = clamp(Math.ceil(box.w+pad*2), 1, sourceCanvas.width-x);
+  const h = clamp(Math.ceil(box.h+pad*2), 1, sourceCanvas.height-y);
+  const c = document.createElement('canvas'); c.width=w; c.height=h;
+  c.getContext('2d').drawImage(sourceCanvas, x,y,w,h, 0,0,w,h);
+  const mk = makeMaskFromCanvas(c);
+  const isolated = isolateAndTightCrop(c, mk);
+  return {...isolated, maskW:isolated.width, maskH:isolated.height, box:{x,y,w,h}};
+}
+
+function detectCandidatesFromCurrent(){
+  if(!state.image){ setStatus('まず画像を読み込んでください。'); return; }
+  setStatus('候補を検出中…');
+  const source = imgToCanvas(state.image);
+  state.sourceCanvas = source;
+  const mk = makeMaskFromCanvas(source);
+  const comps = components(mk.mask, mk.width, mk.height, +els.minArea.value).slice(0,12);
+  if(comps.length < 5){
+    state.candidates = [];
+    renderCandidateGrid();
+    setStatus(`候補が ${comps.length} 個しか見つかりませんでした。白背景の5面図を使ってください。`);
+    return;
+  }
+  state.candidates = comps.map((c,i)=>({id:i+1, ...cropFromSource(source,c), area:c.area, cx:c.cx, cy:c.cy}));
+  autoAssignRoles();
+  renderCandidateGrid();
+  renderAssignmentUI();
+  initializeAllTransforms();
+  setActiveRole('front');
+  drawNet();
+  renderFinalViews();
+  rebuild3D();
+}
+
+function renderCandidateGrid(){
+  els.candidateGrid.innerHTML = '';
+  state.candidates.forEach((cand, idx) => {
+    const div = document.createElement('div');
+    div.className = 'candidate';
+    div.innerHTML = `<div class="cap mono">#${cand.id}</div><canvas width="120" height="120"></canvas>`;
+    const cv = div.querySelector('canvas');
+    const ctx = cv.getContext('2d');
+    ctx.fillStyle='#fff'; ctx.fillRect(0,0,cv.width,cv.height);
+    const s = Math.min(cv.width/cand.canvas.width, cv.height/cand.canvas.height);
+    const w = cand.canvas.width*s, h = cand.canvas.height*s;
+    ctx.drawImage(cand.canvas, (cv.width-w)/2, (cv.height-h)/2, w,h);
+    div.addEventListener('click', () => {
+      state.assignments[state.activeRole] = idx;
+      autoFitRole(state.activeRole);
+      renderAssignmentUI(); drawNet(); renderFinalViews();
+    });
+    els.candidateGrid.appendChild(div);
+  });
+}
+
+function autoAssignRoles(){
+  const picks = state.candidates.slice(0,5);
+  if(picks.length < 5) return;
+  let topIndex = 0;
+  for(let i=1;i<picks.length;i++) if(picks[i].cy > picks[topIndex].cy) topIndex = i;
+  const topCand = picks[topIndex];
+  const row = picks.filter((_,i)=>i!==topIndex).sort((a,b)=>a.cx-b.cx);
+  const map = {front: row[0], left: row[1], right: row[2], back: row[3], top: topCand};
+  for(const role of ROLES) state.assignments[role] = state.candidates.findIndex(c=>c.id===map[role].id);
+}
+
+function renderAssignmentUI(){
+  for(const role of ROLES){
+    const sel = $(`assign_${role}`);
+    const assigned = state.assignments[role];
+    sel.innerHTML = state.candidates.map((c, idx) => `<option value="${idx}">#${c.id}</option>`).join('');
+    if(assigned != null && assigned >= 0) sel.value = assigned;
+    sel.onchange = () => {
+      state.assignments[role] = +sel.value;
+      autoFitRole(role);
+      if(role===state.activeRole) syncRoleControls();
+      drawNet(); renderFinalViews();
+      $(`assigned_${role}`).textContent = '#' + state.candidates[state.assignments[role]].id;
+    };
+    const lab = assigned!=null && assigned>=0 ? ('#'+state.candidates[assigned].id) : '-';
+    $(`assigned_${role}`).textContent = lab;
+  }
+}
+
+function defaultTransformFor(role){
+  // The original successful prototype normalized each tight view directly
+  // to its target projection. Keep that behavior as the neutral state.
+  // Manual transforms are small corrections *after* normalization.
+  return {x:0,y:0,scale:1,flip:false};
+}
+function autoFitRole(role){
+  state.transforms[role] = defaultTransformFor(role);
+}
+function initializeAllTransforms(){
+  for(const role of ROLES) autoFitRole(role);
+  syncRoleControls();
+}
+
+function renderTransformedCandidateToCanvas(role){
+  const idx = state.assignments[role];
+  if(idx == null || idx < 0 || !state.candidates[idx]) return null;
+  const cand = state.candidates[idx];
+  const t = state.transforms[role] || defaultTransformFor(role);
+
+  // Stage 1: reproduce the first prototype's behavior: the tight object crop
+  // is normalized to the full canonical projection. This intentionally lets
+  // X/Y scale independently; reconstruction later maps it to X×Y / Z×Y / X×Z.
+  const canonical = document.createElement('canvas');
+  canonical.width=NORM; canonical.height=NORM;
+  const cc = canonical.getContext('2d');
+  cc.clearRect(0,0,NORM,NORM);
+  cc.drawImage(cand.canvas, 0,0,NORM,NORM);
+
+  // Stage 2: optional manual registration around the canonical center.
+  const c = document.createElement('canvas'); c.width=NORM; c.height=NORM;
+  const ctx = c.getContext('2d');
+  ctx.clearRect(0,0,NORM,NORM);
+  const w=NORM*t.scale, h=NORM*t.scale;
+  const x=(NORM-w)/2+t.x, y=(NORM-h)/2+t.y;
+  if(t.flip){
+    ctx.save(); ctx.translate(x+w,y); ctx.scale(-1,1);
+    ctx.drawImage(canonical,0,0,w,h); ctx.restore();
+  } else {
+    ctx.drawImage(canonical,x,y,w,h);
+  }
+  // Do not dilate again here: candidate extraction already did it once.
+  const mk = makeMaskFromCanvas(c, false);
+  return {canvas:c, width:NORM, height:NORM, mask:mk.mask};
+}
+function renderFinalViews(){
+  const wrap = els.finalGrid;
+  wrap.innerHTML = '';
+  state.finalViews = {};
+  for(const role of ROLES){
+    const v = renderTransformedCandidateToCanvas(role);
+    if(v) state.finalViews[role] = v;
+    const div = document.createElement('div'); div.className='mini';
+    div.innerHTML = `<div class="cap mono">${ROLE_LABEL[role]}</div><canvas width="110" height="110"></canvas>`;
+    const cv = div.querySelector('canvas'), ctx = cv.getContext('2d');
+    ctx.fillStyle='#fff'; ctx.fillRect(0,0,cv.width,cv.height);
+    if(v) ctx.drawImage(v.canvas, 0,0, cv.width, cv.height);
+    wrap.appendChild(div);
+  }
+}
+
+function drawGuides(ctx, slot, role){
+  ctx.save();
+  ctx.strokeStyle = '#d0cbc1';
+  ctx.lineWidth = 1;
+  ctx.strokeRect(slot.x, slot.y, slot.w, slot.h);
+  if(role==='top'){
+    ctx.beginPath();
+    ctx.moveTo(slot.x+slot.w/2, slot.y+8); ctx.lineTo(slot.x+slot.w/2, slot.y+slot.h-8);
+    ctx.moveTo(slot.x+8, slot.y+slot.h/2); ctx.lineTo(slot.x+slot.w-8, slot.y+slot.h/2);
+    ctx.stroke();
+  } else {
+    const centerX = slot.x + slot.w/2;
+    const baseY = slot.y + slot.h*(220/NORM);
+    ctx.beginPath();
+    ctx.moveTo(centerX, slot.y+8); ctx.lineTo(centerX, slot.y+slot.h-8);
+    ctx.moveTo(slot.x+8, baseY); ctx.lineTo(slot.x+slot.w-8, baseY);
+    ctx.stroke();
+  }
+  ctx.fillStyle='#726b5f'; ctx.font='11px system-ui'; ctx.fillText(ROLE_LABEL[role], slot.x+4, slot.y+13);
+  ctx.restore();
+}
+function drawNet(){
+  const c = els.netCanvas, ctx = c.getContext('2d');
+  ctx.clearRect(0,0,c.width,c.height);
+  ctx.fillStyle = '#f2efe8'; ctx.fillRect(0,0,c.width,c.height);
+  ctx.fillStyle = '#6e675d'; ctx.font='12px system-ui';
+  ctx.fillText('展開図ビュー（ドラッグで微調整）', 12, 18);
+  for(const role of ROLES){
+    const slot = NET_SLOTS[role];
+    drawGuides(ctx, slot, role);
+    const v = renderTransformedCandidateToCanvas(role);
+    if(v) ctx.drawImage(v.canvas, slot.x, slot.y, slot.w, slot.h);
+    if(role===state.activeRole){
+      ctx.save(); ctx.strokeStyle='#4b8b6c'; ctx.lineWidth=2;
+      ctx.strokeRect(slot.x-2, slot.y-2, slot.w+4, slot.h+4); ctx.restore();
+    }
+  }
+}
+function hitRoleInNet(x,y){
+  for(const role of ROLES){
+    const s = NET_SLOTS[role];
+    if(x>=s.x && x<=s.x+s.w && y>=s.y && y<=s.y+s.h) return role;
+  }
+  return null;
+}
+function setupNetDragging(){
+  const c = els.netCanvas;
+  c.addEventListener('pointerdown', e => {
+    const r = c.getBoundingClientRect();
+    const sx = (e.clientX-r.left)*(c.width/r.width);
+    const sy = (e.clientY-r.top)*(c.height/r.height);
+    const role = hitRoleInNet(sx,sy);
+    if(!role) return;
+    setActiveRole(role);
+    state.drag = {role, startX:sx, startY:sy, startTX:state.transforms[role].x, startTY:state.transforms[role].y};
+    c.setPointerCapture(e.pointerId);
+  });
+  c.addEventListener('pointermove', e => {
+    if(!state.drag) return;
+    const r = c.getBoundingClientRect();
+    const sx = (e.clientX-r.left)*(c.width/r.width);
+    const sy = (e.clientY-r.top)*(c.height/r.height);
+    const localScale = NET_SLOTS[state.drag.role].w / NORM;
+    const dx = (sx-state.drag.startX) / localScale;
+    const dy = (sy-state.drag.startY) / localScale;
+    const t = state.transforms[state.drag.role];
+    t.x = clamp(state.drag.startTX + dx, -64, 64);
+    t.y = clamp(state.drag.startTY + dy, -64, 64);
+    if(state.drag.role===state.activeRole) syncRoleControls();
+    drawNet(); renderFinalViews();
+  });
+  window.addEventListener('pointerup', () => { state.drag = null; });
+}
+setupNetDragging();
+
+function resizeMask(mask,w0,h0,w,h){
+  const out = new Uint8Array(w*h);
+  for(let y=0;y<h;y++) for(let x=0;x<w;x++){
+    const sx = Math.round((x/(w-1||1))*(w0-1));
+    const sy = Math.round((y/(h-1||1))*(h0-1));
+    out[y*w+x] = mask[sy*w0+sx];
+  }
+  return out;
+}
+function flipX(mask,w,h){ const out=new Uint8Array(mask.length); for(let y=0;y<h;y++) for(let x=0;x<w;x++) out[y*w+x]=mask[y*w+(w-1-x)]; return out; }
+function orMask(a,b){ const out=new Uint8Array(a.length); for(let i=0;i<a.length;i++) out[i]=a[i]||b[i]?1:0; return out; }
+function dilateProjection2x2(mask,w,h){
+  // The first successful chair prototype dilated each *downsampled projection*
+  // once with a 2x2 kernel. This is separate from source-image cleanup and is
+  // important for preserving thin legs/posts at 20-50 cell resolutions.
+  const src=mask.slice(), out=mask.slice();
+  for(let y=0;y<h;y++) for(let x=0;x<w;x++){
+    if(!src[y*w+x]) continue;
+    if(x+1<w) out[y*w+x+1]=1;
+    if(y+1<h) out[(y+1)*w+x]=1;
+    if(x+1<w && y+1<h) out[(y+1)*w+x+1]=1;
+  }
+  return out;
+}
+function dimsForPreset(){
+  switch(els.preset.value){
+    case 'simple': return [20,36,22];
+    case 'large': return [28,50,30];
+    default: return [24,44,26];
+  }
+}
+function reconstruct(finalViews, X,Y,Z){
+  const front = resizeMask(finalViews.front.mask, NORM,NORM, X,Y);
+  const back  = flipX(resizeMask(finalViews.back.mask, NORM,NORM, X,Y), X,Y);
+  const xy = dilateProjection2x2(orMask(front, back), X,Y);
+  const left = resizeMask(finalViews.left.mask, NORM,NORM, Z,Y);
+  const right = flipX(resizeMask(finalViews.right.mask, NORM,NORM, Z,Y), Z,Y);
+  const zy = dilateProjection2x2(orMask(left, right), Z,Y);
+  const top = dilateProjection2x2(resizeMask(finalViews.top.mask, NORM,NORM, X,Z), X,Z);
+  const occ = new Uint8Array(X*Y*Z);
+  for(let x=0;x<X;x++) for(let y=0;y<Y;y++){
+    const iy = Y-1-y;
+    if(!xy[iy*X + x]) continue;
+    for(let z=0;z<Z;z++){
+      if(zy[iy*Z + z] && top[z*X + x]) occ[(x*Y+y)*Z+z] = 1;
+    }
+  }
+  return {occ, X,Y,Z};
+}
+function buildPalette(views,k=6){
+  const samples=[];
+  for(const role of ROLES){
+    const v = views[role]; if(!v) continue;
+    const data = v.canvas.getContext('2d').getImageData(0,0,NORM,NORM).data;
+    for(let i=0,p=0;i<data.length;i+=4,p++) if(v.mask[p]) samples.push([data[i],data[i+1],data[i+2]]);
+  }
+  if(!samples.length) return [[180,140,100]];
+  const step = Math.max(1, Math.floor(samples.length/1500));
+  const pts = samples.filter((_,i)=>i%step===0);
+  let centers=[]; for(let i=0;i<k;i++) centers.push(pts[Math.floor(i*pts.length/k)] || pts[0]);
+  for(let it=0; it<6; it++){
+    const sums = Array.from({length:k}, ()=>[0,0,0,0]);
+    for(const p of pts){
+      let bi=0, bd=1e18;
+      for(let i=0;i<k;i++){ const c=centers[i]; const d=(p[0]-c[0])**2+(p[1]-c[1])**2+(p[2]-c[2])**2; if(d<bd){bd=d;bi=i;} }
+      sums[bi][0]+=p[0]; sums[bi][1]+=p[1]; sums[bi][2]+=p[2]; sums[bi][3]++;
+    }
+    centers = centers.map((c,i)=> sums[i][3] ? [sums[i][0]/sums[i][3], sums[i][1]/sums[i][3], sums[i][2]/sums[i][3]] : c);
+  }
+  return centers.map(c=>c.map(v=>Math.round(v))).sort((a,b)=>(a[0]+a[1]+a[2])-(b[0]+b[1]+b[2]));
+}
+function sampleRgb(view,u01,v01){
+  const x = clamp(Math.round(u01*(NORM-1)),0,NORM-1), y = clamp(Math.round(v01*(NORM-1)),0,NORM-1);
+  const idx = y*NORM+x; if(!view.mask[idx]) return null;
+  const data = view.canvas.getContext('2d').getImageData(0,0,NORM,NORM).data; const i=idx*4;
+  return [data[i],data[i+1],data[i+2]];
+}
+function nearestPalette(color,palette){ let best=palette[0], bd=1e18; for(const p of palette){ const d=(color[0]-p[0])**2+(color[1]-p[1])**2+(color[2]-p[2])**2; if(d<bd){bd=d;best=p;} } return best; }
+function hex(c){ return '#' + c.map(v=>v.toString(16).padStart(2,'0')).join(''); }
+function colorize(raw, finalViews){
+  const palette = buildPalette(finalViews, 6);
+  const voxels=[];
+  for(let x=0;x<raw.X;x++) for(let y=0;y<raw.Y;y++) for(let z=0;z<raw.Z;z++){
+    if(!raw.occ[(x*raw.Y+y)*raw.Z+z]) continue;
+    const fx = x/(raw.X-1||1), fy = 1-y/(raw.Y-1||1), fz = z/(raw.Z-1||1);
+    const sam = [
+      sampleRgb(finalViews.front, fx, fy),
+      sampleRgb(finalViews.back, 1-fx, fy),
+      sampleRgb(finalViews.left, fz, fy),
+      sampleRgb(finalViews.right, 1-fz, fy),
+      sampleRgb(finalViews.top, fx, fz),
+    ].filter(Boolean);
+    const c = nearestPalette(sam.length ? sam[Math.floor(sam.length/2)] : [190,150,110], palette);
+    voxels.push({x,y,z,color:hex(c)});
+  }
+  return {name:'5-view visual hull', voxels, meta:{dimensions:[raw.X,raw.Y,raw.Z], voxelCount:voxels.length, method:'5-view RGB silhouette visual hull', note:'manual role assignment + layout adjustment enabled'}};
+}
+function rebuild3D(){
+  if(!state.candidates.length){ setStatus('候補がありません。'); return; }
+  setStatus('最終5面を生成中…');
+  renderFinalViews();
+  if(!state.finalViews || ROLES.some(r => !state.finalViews[r])){ setStatus('5面が揃っていません。'); return; }
+  const [X,Y,Z] = dimsForPreset();
+  setStatus('Visual Hull を構築中…');
+  const raw = reconstruct(state.finalViews, X,Y,Z);
+  setStatus('色を転写中…');
+  state.model = colorize(raw, state.finalViews);
+  els.summary.textContent = `${X}×${Y}×${Z} / ${state.model.voxels.length.toLocaleString()} voxels`;
+  setStatus('完成。右のプレビューを回せます。');
+  drawModel();
+}
+
+function drawModel(){
+  const canvas = els.view, ctx = canvas.getContext('2d');
+  const rect = canvas.getBoundingClientRect();
+  const dpr = Math.max(1, window.devicePixelRatio || 1);
+  canvas.width = Math.max(420, Math.floor(rect.width*dpr));
+  canvas.height = Math.max(420, Math.floor(rect.height*dpr));
+  ctx.scale(dpr,dpr);
+  const W = rect.width || 800, H = rect.height || 700;
+  ctx.fillStyle = '#f3f1eb'; ctx.fillRect(0,0,W,H);
+  if(!state.model){ ctx.fillStyle='#766f63'; ctx.font='16px system-ui'; ctx.fillText('ここに3Dプレビューが出ます', 24, 34); return; }
+  const yaw = ((window._voxelYaw ?? 45)) * Math.PI/180;
+  const pitch = ((window._voxelPitch ?? 28)) * Math.PI/180;
+  const dot = window._voxelDot ?? 5;
+  const voxels = state.model.voxels, dims = state.model.meta.dimensions;
+  const cx=(dims[0]-1)/2, cy=(dims[1]-1)/2, cz=(dims[2]-1)/2;
+  const pts=[]; let minx=1e9,maxx=-1e9,miny=1e9,maxy=-1e9;
+  for(const v of voxels){
+    const X=v.x-cx, Y=v.y-cy, Z=v.z-cz;
+    const sx = X*Math.cos(yaw)+Z*Math.sin(yaw);
+    const z1 = -X*Math.sin(yaw)+Z*Math.cos(yaw);
+    const sy = Y*Math.cos(pitch)-z1*Math.sin(pitch);
+    const depth = Y*Math.sin(pitch)+z1*Math.cos(pitch);
+    pts.push({sx,sy,depth,v});
+    minx=Math.min(minx,sx); maxx=Math.max(maxx,sx); miny=Math.min(miny,sy); maxy=Math.max(maxy,sy);
+  }
+  const scale = Math.min(W*0.72/(maxx-minx+1), H*0.72/(maxy-miny+1));
+  const occ = new Set(voxels.map(v=>`${v.x},${v.y},${v.z}`));
+  const dirs=[[1,0,0],[-1,0,0],[0,1,0],[0,-1,0],[0,0,1],[0,0,-1]];
+  pts.sort((a,b)=>a.depth-b.depth);
+  for(const p of pts){
+    const q=p.v;
+    let exposed=0; for(const d of dirs) if(!occ.has(`${q.x+d[0]},${q.y+d[1]},${q.z+d[2]}`)) exposed++;
+    const col=q.color.match(/[0-9a-f]{2}/g).map(x=>parseInt(x,16));
+    const f=[0.52,0.68,0.84,1][Math.min(3, Math.max(0, exposed-1))];
+    const shaded = col.map((v,i)=>Math.round(v*f + (i===2?14:0)*(1-f)));
+    const x=(p.sx-(minx+maxx)/2)*scale + W/2;
+    const y=-(p.sy-(miny+maxy)/2)*scale + H/2;
+    ctx.fillStyle=`rgb(${shaded[0]},${shaded[1]},${shaded[2]})`;
+    ctx.fillRect(Math.round(x-dot/2), Math.round(y-dot/2), dot, dot);
+  }
+}
+
+function setupModelDragging(){
+  const c = els.view;
+  let drag = null;
+  window._voxelYaw = 45; window._voxelPitch = 28; window._voxelDot = 5;
+  c.addEventListener('pointerdown', e => { drag = {x:e.clientX, y:e.clientY, yaw:window._voxelYaw, pitch:window._voxelPitch}; c.setPointerCapture(e.pointerId); });
+  c.addEventListener('pointermove', e => {
+    if(!drag) return;
+    window._voxelYaw = (drag.yaw + (e.clientX-drag.x)*0.7 + 3600) % 360;
+    window._voxelPitch = clamp(drag.pitch - (e.clientY-drag.y)*0.35, -45, 60);
+    drawModel();
+  });
+  window.addEventListener('pointerup', () => drag = null);
+  c.addEventListener('wheel', e => { e.preventDefault(); window._voxelDot = clamp((window._voxelDot||5) + (e.deltaY>0?-1:1), 2, 10); drawModel(); }, {passive:false});
+}
+setupModelDragging();
+
+window.addEventListener('resize', () => { drawModel(); drawNet(); });
+updateLabels();
+roleCardHighlight();
+setActiveRole('front');
+drawModel();
+drawNet();
+})();
+</script>
+</body>
+</html>
