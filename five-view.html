@@ -70,7 +70,7 @@
 
     <h2>3. 候補ビュー</h2>
     <div class="candidateGrid" id="candidateGrid"></div>
-    <div class="hint">白背景シートから見つけた候補です。役割割り当てで使います。検出順は大きい順。</div>
+    <div class="hint">白背景シートから見つけた候補です。自動割り当ては画面の読み順を Front → Left → Right → Back → Top と解釈します。</div>
 
     <h2>4. 役割の割り当て</h2>
     <div class="roles" id="roleGrid"></div>
@@ -461,11 +461,27 @@ function renderCandidateGrid(){
 function autoAssignRoles(){
   const picks = state.candidates.slice(0,5);
   if(picks.length < 5) return;
-  let topIndex = 0;
-  for(let i=1;i<picks.length;i++) if(picks[i].cy > picks[topIndex].cy) topIndex = i;
-  const topCand = picks[topIndex];
-  const row = picks.filter((_,i)=>i!==topIndex).sort((a,b)=>a.cx-b.cx);
-  const map = {front: row[0], left: row[1], right: row[2], back: row[3], top: topCand};
+
+  // Generated turnaround sheets commonly use either 4+1 or 3+2 layouts.
+  // Interpret views in visual reading order rather than assuming the lowest
+  // component is always Top: Front -> Left -> Right -> Back -> Top.
+  const heights = picks.map(c=>c.height||c.h||c.canvas?.height||0).sort((a,b)=>a-b);
+  const medianH = heights[Math.floor(heights.length/2)] || 100;
+  const rowTolerance = Math.max(24, medianH * 0.42);
+  const rows = [];
+  for(const cand of [...picks].sort((a,b)=>a.cy-b.cy)){
+    let row = rows.find(r=>Math.abs(cand.cy-r.cy)<=rowTolerance);
+    if(!row){
+      row={cy:cand.cy,items:[]};
+      rows.push(row);
+    }
+    row.items.push(cand);
+    row.cy=row.items.reduce((sum,c)=>sum+c.cy,0)/row.items.length;
+  }
+  rows.sort((a,b)=>a.cy-b.cy);
+  const ordered = rows.flatMap(r=>r.items.sort((a,b)=>a.cx-b.cx));
+  const [front,left,right,back,top] = ordered;
+  const map = {front,left,right,back,top};
   for(const role of ROLES) state.assignments[role] = state.candidates.findIndex(c=>c.id===map[role].id);
 }
 
