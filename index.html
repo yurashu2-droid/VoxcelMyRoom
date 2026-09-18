@@ -1,12 +1,606 @@
 <!doctype html>
-<html lang="ja">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width,initial-scale=1.0" />
-    <title>Voxel / Pixel — Rendering Lab</title>
-  </head>
-  <body>
-    <div id="app"></div>
-    <script type="module" src="/src/main.ts"></script>
-  </body>
-</html>
+<html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#1a2220"><title>Voxcel My Room — 写真から、小さな世界へ。</title><link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cpath fill='%23c8d9a0' d='M16 2 30 10v14l-14 8L2 24V10z'/%3E%3Cpath fill='%23859d69' d='m16 16 14-6v14l-14 8z'/%3E%3C/svg%3E"><style>:root{font-family:Inter,"Noto Sans JP","Hiragino Kaku Gothic ProN","Yu Gothic",system-ui,sans-serif;color:#f0f0e5;background:#18201e;font-synthesis:none;--panel:#202925;--line:#36433b;--muted:#a0aa9f;--accent:#cfdfa6;--orange:#edb583;--ink:#22352a}*{box-sizing:border-box}body{margin:0}button,input,select{font:inherit}button{display:inline-flex;align-items:center;justify-content:center;gap:7px;min-height:36px;border:1px solid var(--line);border-radius:7px;padding:8px 11px;color:inherit;background:#29342d;cursor:pointer;font-size:12px;transition:background .13s,border-color .13s}button:hover{background:#384637;border-color:#748263}button:active{transform:translateY(1px)}button:disabled{opacity:.38;cursor:not-allowed;transform:none}button:focus-visible,input:focus-visible,select:focus-visible,canvas:focus-visible{outline:2px solid var(--accent);outline-offset:3px}button svg,[data-icon] svg{width:17px;height:17px;display:block;flex-shrink:0}input,select{color:inherit;background:#18221c;border:1px solid var(--line);border-radius:5px;padding:7px;font-size:12px}input[type=range]{padding:0;border:0;width:100%;height:20px;accent-color:var(--accent);cursor:pointer}input[type=checkbox]{accent-color:var(--accent)}input[type=number]{width:72px}input[type=file][hidden],[hidden]{display:none!important}select{cursor:pointer}h2,h3,p{margin:0}h2{font-size:20px;font-weight:650;letter-spacing:.015em}h3{font-size:13px;font-weight:650}.muted{color:var(--muted)}.small{font-size:11px;line-height:1.9}.eyebrow{font-size:9px;letter-spacing:.17em;font-weight:650;color:#a3b293;margin-bottom:10px}.primary{background:var(--accent);color:#263923;border-color:var(--accent);font-weight:700;min-height:42px}.primary:hover{background:#e1ecc3;border-color:#e1ecc3}.quiet{background:transparent;border-color:transparent}.soft{background:#303d32}.icon-button{min-width:33px;width:33px;padding:6px;font-size:19px;line-height:1;background:transparent;border-color:transparent}.wide{width:100%}.wide svg{margin-right:2px}.topbar{height:78px;display:flex;align-items:center;justify-content:space-between;padding:0 28px;border-bottom:1px solid var(--line);background:#1a231f}.brand{display:flex;gap:13px;align-items:center;font-size:18px;font-weight:600;letter-spacing:-.02em;white-space:nowrap}.brand>svg{width:33px;height:36px}.brand small{display:block;font-size:8px;letter-spacing:.19em;margin-top:6px;color:#afbc9b}.brand small span{color:#738172}.top-actions{display:flex;align-items:center;gap:10px}.save-status{font-size:10px;color:#a4b597;margin-right:12px;max-width:160px}.save-status:before,.privacy-dot{content:"";display:inline-block;width:5px;height:5px;border-radius:50%;background:#a9c48a;margin-right:7px}.save-status.warning{color:#efb184}.workspace{display:grid;grid-template-columns:248px minmax(350px,1fr) 226px;min-height:calc(100dvh - 78px)}.panel{background:var(--panel);padding:28px 19px 18px}.library{border-right:1px solid var(--line);display:flex;flex-direction:column}.heading-row{display:flex;justify-content:space-between;align-items:center}.count{display:inline-flex;font-size:10px;background:#33412f;color:var(--accent);padding:4px 8px;border-radius:4px}.intro{font-size:10px;margin-top:12px;margin-bottom:23px;line-height:1.8}.library-tabs{display:flex;gap:18px;margin:25px 0 17px;border-bottom:1px solid var(--line)}.library-tabs button{padding:0 0 10px;border:none;border-bottom:2px solid transparent;border-radius:0;min-height:28px;background:none;color:var(--muted);font-size:11px}.library-tabs .active{color:var(--accent);border-bottom-color:var(--accent)}.asset-grid{display:grid;grid-template-columns:1fr 1fr;gap:15px 10px;align-content:start;max-height:calc(100dvh - 420px);min-height:220px;overflow:auto;padding:2px}.asset-card{display:flex;flex-direction:column;align-items:stretch;padding:0;background:none;border:0;text-align:left;gap:6px;min-width:0}.asset-card:hover{background:none}.asset-thumb{display:grid;place-items:center;background:#d7d7bd;height:100px;border-radius:8px;border:2px solid transparent;overflow:hidden;position:relative}.asset-card:hover .asset-thumb{border-color:var(--accent);background:#e5e3c8}.asset-card.selected .asset-thumb{border-color:var(--orange)}.asset-thumb canvas{width:80px;height:80px;image-rendering:pixelated}.asset-thumb:after{content:"＋";position:absolute;right:5px;bottom:4px;font-size:14px;color:#415440;opacity:0}.asset-card:hover .asset-thumb:after{opacity:1}.asset-label{font-size:10px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:100%}.asset-kind{font-size:8px;color:#8d9c87;letter-spacing:.055em}.sample-try{margin-top:25px;width:100%;padding:13px 8px;gap:7px;justify-content:space-between;border:1px dashed #58644d;background:none;text-align:left;font-size:10px}.sample-try>span:first-child{color:#c5d4a5}.sample-try small{display:block;color:#91a287;font-size:8px;margin-top:5px}.library-foot{margin-top:auto;padding-top:26px;font-size:9px;color:#81917c;white-space:nowrap}.studio{padding:28px 24px 0;display:flex;flex-direction:column;min-width:0;overflow:hidden}.studio-heading{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:15px}.studio-heading .eyebrow{margin-bottom:7px}.studio-heading input{font-size:27px;font-weight:550;color:#eeeede;letter-spacing:.04em;padding:0;border:0;background:none;max-width:100%;width:240px}.studio-heading-right{display:flex;align-items:center;gap:16px}.live-badge{font-size:8px;letter-spacing:.08em;color:#a7b899;white-space:nowrap}.live-badge:before{content:"";display:inline-block;width:4px;height:4px;background:#a4b886;margin-right:6px;border-radius:50%}.studio-heading-right button{font-size:10px}.room-stage{position:relative;display:grid;place-items:center;flex:1;min-height:460px;height:calc(100dvh - 284px);max-height:850px;overflow:hidden;border:1px solid #334034;border-radius:12px;background:radial-gradient(ellipse at 48% 52%,#2d392c,#202b24 75%)}.room-stage:before{position:absolute;inset:0;content:"";background-image:radial-gradient(#70806345 .5px,transparent .5px);background-size:16px 16px;opacity:.35;pointer-events:none}.stage-meta{position:absolute;top:18px;left:19px;right:16px;display:flex;align-items:center;justify-content:space-between;gap:12px;z-index:1;color:#a2b28f;font-family:ui-monospace,monospace;font-size:9px;letter-spacing:.02em}.segmented{display:flex;background:#1c261f;border:1px solid #43503b;border-radius:6px;padding:3px;gap:3px}.segmented button{font-family:inherit;font-size:10px;padding:4px 10px;min-height:26px;background:none;border:0;border-radius:3px;color:#97a18c}.segmented button.active{background:#3c4b32;color:#d7e5b1}#room-canvas{display:block;position:relative;z-index:0;touch-action:none;image-rendering:pixelated;cursor:grab}#room-canvas:active{cursor:grabbing}.stage-tip{position:absolute;bottom:20px;display:flex;align-items:center;gap:8px;font-size:10px;color:#acb69c;pointer-events:none}.stage-tip svg{width:12px}.viewbar{height:62px;display:flex;align-items:center;justify-content:space-between;gap:12px}.button-group,.view-controls{display:flex;align-items:center;gap:2px}.view-controls{background:#232f25;padding:3px 5px;border-radius:8px;border:1px solid #344330}.view-controls .icon-button{width:27px;min-width:27px;min-height:28px;font-size:17px}.view-controls>span:not(.divider){font-size:10px;color:#b5c5a3;min-width:29px;text-align:center}.divider{height:14px;width:1px;background:#4a5740;margin:0 7px}.zoom-label{border:0;background:none;font-size:10px;min-height:24px;padding:0 5px;min-width:37px}.snap{display:flex;align-items:center;font-size:9px;color:#a7b297;white-space:nowrap}.flow-footer{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:16px 0 19px;border-top:1px solid #344030;font-size:9px;color:#8b9b80}.flow-footer>span{font-size:8px;letter-spacing:.13em;white-space:nowrap}.flow-footer i{font-style:normal;color:#5e7155;margin:0 5px}.inspector{border-left:1px solid var(--line);padding:28px 19px 20px}.inspector h2{font-size:17px}.empty-selection{padding:44px 0 38px;text-align:center;color:#9da88f}.empty-selection>span{display:flex;justify-content:center;color:#80966e}.empty-selection svg{width:42px;height:42px;stroke-width:1}.empty-selection p{font-size:11px;margin:18px 0 8px}.empty-selection small{font-size:10px;line-height:2;color:#7f907a}.selected-preview{display:grid;place-items:center;margin:20px 0 14px;height:123px;border:1px solid #46533d;border-radius:7px}.selected-preview canvas{image-rendering:pixelated}.inspector h3{margin-top:0;line-height:1.8}.control-label{display:flex;justify-content:space-between;font-size:10px;color:#bcc7ac;margin:18px 0 9px;align-items:center}.control-label output{color:var(--accent);font-size:10px}.two-buttons{display:grid;grid-template-columns:1fr 1fr;gap:7px}.two-buttons button{font-size:10px;padding:7px 5px}.position-fields{display:flex;justify-content:space-between;gap:8px;margin-top:18px}.position-fields label{display:flex;align-items:center;gap:8px;color:#a9b89a;font-size:10px}.position-fields input{min-width:0;width:64px}.action-row{margin-top:16px}.danger{color:#e3a692}.world-settings{margin-top:26px;padding-top:24px;border-top:1px solid var(--line)}.world-settings .eyebrow{font-size:8px}.theme-options{display:flex;gap:10px;margin:17px 0 22px}.theme{width:33px;min-width:33px;min-height:28px;height:28px;padding:0;border-radius:5px;border:3px solid #202925;background:#e2cfae;outline:1px solid #566049}.theme[data-theme=moss]{background:#9caf7b}.theme[data-theme=night]{background:#536371}.theme.active{outline:2px solid #cbdda9}.check-row{display:flex;align-items:center;justify-content:space-between;font-size:10px;margin:15px 0;color:#b6c2a8;gap:8px}.check-row select{font-size:10px;padding:4px}.reset-link{margin-top:28px;border:0;background:none;color:#7e9177;font-size:9px;padding:0;min-height:25px}.checker{background-color:#2a352d;background-image:linear-gradient(45deg,#354031 25%,transparent 25%),linear-gradient(-45deg,#354031 25%,transparent 25%),linear-gradient(45deg,transparent 75%,#354031 75%),linear-gradient(-45deg,transparent 75%,#354031 75%);background-size:16px 16px;background-position:0 0,0 8px,8px -8px,-8px 0}dialog{border:1px solid #56634b;background:#202a23;color:#ecedde;border-radius:14px;padding:0;box-shadow:0 24px 100px #0009}dialog::backdrop{background:#0b130eda;backdrop-filter:blur(5px)}.creator{width:min(1180px,calc(100vw - 40px));max-height:94dvh;overflow:auto}.dialog-header{display:flex;justify-content:space-between;align-items:center;padding:24px 27px 19px}.dialog-header h2{font-size:24px}.dialog-header .eyebrow{margin-bottom:7px}.creation-status{font-size:11px;line-height:1.8;background:#2b3628;color:#bfd0ab;margin:0 27px 22px;padding:10px 13px;border:1px solid #495540;border-radius:6px;min-height:40px}.creation-status.error{color:#f0b9a0;border-color:#985f47;background:#3d2e26}.creation-status.busy:before{content:"";display:inline-block;width:9px;height:9px;border-radius:50%;border:2px solid #718764;border-top-color:#d1e3b2;animation:spin .8s linear infinite;margin-right:9px}@keyframes spin{to{transform:rotate(360deg)}}.creation-columns{display:grid;grid-template-columns:1fr 1fr 1.05fr;padding:0 27px;gap:23px}.creation-step{min-width:0}.creation-step h3{display:flex;align-items:center;gap:10px;font-size:13px;margin-bottom:16px}.creation-step h3>span{color:#b4ca90;font-family:ui-monospace,monospace;font-weight:400;font-size:12px}.image-stage{height:254px;display:flex;align-items:center;justify-content:center;overflow:hidden;border-radius:8px;border:1px solid #495640;position:relative;margin-bottom:12px}.image-stage canvas{display:block;max-width:100%;max-height:100%;object-fit:contain}.source-stage{background:#dcd8ca}.source-stage.dragover{border:3px dashed #829956}#source-empty{display:flex;flex-direction:column;align-items:center;text-align:center;color:#52604b;gap:15px;padding:10px}#source-empty svg{width:40px;height:40px;stroke-width:1.3}#source-empty strong{font-size:13px;font-weight:550}#source-empty small{font-size:10px;line-height:2;color:#7a806f}#mask-canvas{touch-action:none;cursor:crosshair}.output-stage canvas{image-rendering:pixelated;max-width:none;max-height:none}.method-badge{position:absolute;left:8px;bottom:8px;font-size:9px;background:#1b251fda;padding:5px 8px;border-radius:4px;color:#c9d8b1}.mask-tools{display:grid;grid-template-columns:1.55fr 1fr 1fr 1.3fr;gap:4px}.mask-tools button{font-size:9px;padding:6px 2px;min-height:31px}.mask-tools button.active,.two-buttons button.active{background:#425437;color:#e2eacb;border-color:#81956d}.brush-row{display:flex;align-items:center;gap:9px;margin:10px 0}.brush-row label{font-size:9px;color:#a8b897;white-space:nowrap}.brush-row input{min-width:0}.brush-row .icon-button{font-size:18px;min-height:28px}.text-button{background:none;border:0;color:#bfd39c;font-size:10px;margin:8px 0 3px;padding:6px 0}.ai-button{border-color:#626b56;color:#dcd8b9}.preview-toolbar{display:flex;align-items:center;justify-content:space-between;gap:5px;margin-bottom:14px}.preview-toolbar span{font-size:10px;color:#b9c8a5;min-width:36px;text-align:center}.preview-toolbar select{font-size:10px;padding:6px;width:104px}.preview-toolbar .icon-button{width:27px;min-width:27px;min-height:29px;font-size:18px}.conversion-settings{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}.conversion-settings label{font-size:9px;color:#aabb98;display:flex;flex-direction:column;gap:7px}.conversion-settings select{width:100%;font-size:11px;padding:6px}.output-step .control-label{margin-top:13px}.output-step .two-buttons{margin-top:12px}.voxel-info{display:flex;align-items:center;justify-content:space-between;margin:13px 0;gap:8px}.voxel-info>span{font-size:8px;font-family:ui-monospace,monospace;color:#b2c49e}#palette-swatches{display:flex;max-width:140px;overflow:hidden;border-radius:2px;height:9px}#palette-swatches span{width:8px;min-width:4px}.creation-note{display:flex;align-items:center;gap:8px;font-size:10px;line-height:1.9;color:#baad8d;border-top:1px solid #3e4935;margin:19px 27px 0;padding:15px 0}.creation-note>span{font-size:10px;width:14px;min-width:14px;height:14px;text-align:center;line-height:14px;border:1px solid #9a8f6f;border-radius:50%}.creation-note button{font-size:10px;margin-left:auto;white-space:nowrap}.creator-footer{padding:16px 27px 23px;background:#1a251d;border-top:1px solid #3f4a36;display:flex;align-items:center;justify-content:space-between;gap:20px}.creator-footer label{display:flex;gap:15px;align-items:center;font-size:11px;color:#b6c6a1}.creator-footer input{width:260px;padding:11px}.creator-footer>div{display:flex;gap:10px}.creator-footer .primary{padding:11px 19px}.help-dialog{width:min(600px,calc(100vw - 32px));max-height:88dvh;overflow:auto;padding:0 26px 26px}.help-dialog .dialog-header{padding:23px 0}.help-dialog h2{font-size:21px}.help-dialog h3{margin:17px 0 8px;color:#c9d7a9}.help-dialog p{font-size:12px;line-height:2;color:#bcc8ae}.help-dialog p.small{font-size:10px;margin-top:19px}.toast{position:fixed;bottom:22px;left:50%;transform:translate(-50%,12px);opacity:0;pointer-events:none;background:#d6e3b7;color:#2e4026;border:1px solid #ecf1da;border-radius:8px;padding:12px 19px;font-size:12px;max-width:90vw;z-index:10;box-shadow:0 8px 30px #0005;transition:opacity .2s,transform .2s}.toast.show{transform:translate(-50%,0);opacity:1}.toast.error{background:#edc0a9;color:#603925}.processing .creation-columns{pointer-events:none;opacity:.65}
+@media(min-width:1650px){.workspace{grid-template-columns:270px minmax(400px,1fr) 250px}.asset-thumb{height:112px}.panel{padding-left:23px;padding-right:23px}.studio{padding-left:34px;padding-right:34px}.room-stage{max-height:none}}
+@media(max-width:1150px){.workspace{grid-template-columns:206px minmax(320px,1fr) 192px}.panel{padding:23px 13px}.studio{padding:24px 16px 0}.topbar{padding:0 20px}.asset-thumb{height:80px}.asset-thumb canvas{width:64px;height:64px}.asset-grid{gap:13px 8px}.intro{font-size:9px}.library-foot{font-size:8px}.studio-heading input{font-size:23px;width:195px}.live-badge{display:none}.flow-footer>span{display:none}.position-fields input{width:53px}.snap{font-size:8px}.viewbar{gap:4px}.creation-columns{gap:14px;padding:0 19px}.dialog-header{padding:22px 20px 17px}.creation-status{margin-left:20px;margin-right:20px}.image-stage{height:215px}.mask-tools button{font-size:8px}.two-buttons button{font-size:9px}.creator-footer input{width:200px}}
+@media(max-width:900px){.workspace{grid-template-columns:190px minmax(300px,1fr)}.inspector{grid-column:1 / -1;border-left:0;border-top:1px solid var(--line);display:grid;grid-template-columns:170px 1fr;gap:15px 25px;padding:20px}.inspector>.eyebrow,.inspector>h2{display:none}.empty-selection{padding:10px}.world-settings{margin:0;padding:0;border:0}.world-settings>h3{display:none}.world-settings .check-row{display:inline-flex;gap:12px;margin:10px 15px 10px 0}.world-settings .small{display:none}.theme-options{margin:8px 0 10px}.reset-link{display:none}#selection-panel{display:grid;grid-template-columns:90px 1fr;gap:5px 10px;grid-column:1}.selected-preview{grid-column:1;grid-row:1/4;margin:0;height:90px}.selected-preview canvas{width:80px;height:80px}#selected-name{font-size:10px;max-width:120px}#selected-meta{font-size:8px}#selection-panel .position-fields{display:none}#selection-panel .control-label{margin:3px 0;grid-column:1 / -1}#selection-panel .two-buttons,#scale-range{grid-column:1 / -1}#selection-panel .action-row{margin-top:4px}.room-stage{height:580px;min-height:420px}.asset-grid{max-height:560px}.library-foot{margin-top:30px}.save-status{font-size:9px;max-width:110px}.creator{width:calc(100vw - 24px)}.creation-columns{grid-template-columns:1fr 1fr}.output-step{grid-column:1 / -1;display:grid;grid-template-columns:1fr 1fr;gap:0 20px}.output-step h3{grid-column:1 / -1}.output-stage{grid-row:2 / 8;grid-column:1;height:280px}.output-step .preview-toolbar{grid-column:2}.output-step .control-label{grid-column:2}.output-step #voxel-thickness{grid-column:2}.output-step .two-buttons,.output-step .voxel-info{grid-column:2}.creator-footer input{width:160px}.creator-footer .primary{font-size:11px;padding:10px 12px}}
+@media(max-width:600px){.topbar{height:66px;padding:0 14px}.brand{gap:8px;font-size:14px}.brand>svg{width:25px;height:29px}.brand small{font-size:6px;letter-spacing:.13em}.top-actions{gap:3px}.top-actions .save-status,.wide-label{display:none}.top-actions button{min-width:30px;padding:6px}.workspace{display:flex;flex-direction:column}.studio{order:0;padding:19px 12px 0}.studio-heading{margin-bottom:14px}.studio-heading input{font-size:23px;width:220px}.studio-heading .eyebrow{font-size:8px}.studio-heading-right button{font-size:10px;padding:6px}.room-stage{min-height:380px;height:440px}.stage-meta{left:12px;right:11px;top:13px;font-size:8px}.segmented button{font-size:9px;padding:4px 7px}.stage-tip{font-size:9px;bottom:15px}.viewbar{height:55px;gap:4px}.view-controls{padding:2px}.view-controls .icon-button{min-width:25px;width:25px}.button-group .icon-button{min-width:28px;width:28px;font-size:17px}.snap{font-size:8px}.snap input{margin:3px}.divider{margin:0 4px}.flow-footer{padding:10px 0 16px;justify-content:center;font-size:9px}.library{order:1;border:0;border-top:1px solid var(--line);padding:20px 16px}.library>.eyebrow{font-size:8px}.library .heading-row h2{font-size:19px}.library .intro{margin:10px 0 15px;font-size:10px}.library-tabs{margin:19px 0 14px}.asset-grid{grid-template-columns:repeat(3,1fr);gap:14px 10px;max-height:400px;min-height:0}.asset-thumb{height:96px}.asset-thumb canvas{width:80px;height:80px}.asset-label{font-size:10px}.library-foot{padding:13px 0 0;margin-top:6px;font-size:9px}.sample-try{margin-top:19px;font-size:11px}.sample-try small{font-size:9px}.inspector{order:2;display:block;padding:20px 16px}.inspector .empty-selection{display:none}.inspector .world-settings{margin-top:20px}#selection-panel{display:block}#selection-panel .selected-preview{float:left;width:96px;height:96px;margin:0 15px 10px 0}#selection-panel .selected-preview canvas{width:96px;height:96px}#selected-name{font-size:13px;max-width:none;padding-top:4px}#selected-meta{font-size:10px;margin-bottom:13px}#selection-panel .control-label{font-size:11px;margin:13px 0 8px}#selection-panel .two-buttons{clear:both}#selection-panel .action-row{margin-top:12px}.world-settings{clear:both;padding-top:20px;border-top:1px solid var(--line)}.world-settings .eyebrow{font-size:9px}.world-settings .check-row{font-size:10px}.creator{width:calc(100vw - 12px);max-height:96dvh;border-radius:10px}.dialog-header{padding:18px 15px 14px}.dialog-header h2{font-size:20px}.creation-status{margin:0 15px 19px;font-size:10px}.creation-columns{display:block;padding:0 15px}.creation-step{margin-bottom:26px}.creation-step h3{font-size:14px}.image-stage{height:256px}.source-stage{height:225px}.two-buttons button{font-size:11px}.mask-tools button{font-size:10px}.output-step{display:block}.output-stage{height:280px}.creation-note{margin:0 15px;align-items:flex-start;font-size:9px}.creation-note>span{margin-top:3px}.creator-footer{display:block;padding:15px}.creator-footer label{display:flex;margin-bottom:15px;justify-content:space-between}.creator-footer input{width:70%;font-size:12px}.creator-footer>div{justify-content:space-between}.creator-footer .primary{font-size:12px}.help-dialog{padding:0 18px 23px}.toast{font-size:11px;width:max-content;max-width:90vw}.output-stage canvas{max-width:none}.image-stage canvas:not(#voxel-preview){max-height:100%}}
+@media(prefers-reduced-motion:reduce){*{scroll-behavior:auto!important;transition:none!important}.creation-status.busy:before{animation:none}}
+
+/* Keep the source raster at integer scale while making the editing preview legible. */
+@media(min-width:1000px){.creator .image-stage{height:286px}}
+</style></head>
+<body>
+<header class="topbar">
+  <div class="brand"><svg viewBox="0 0 40 42" aria-hidden="true"><path d="m20 2 17 9-17 9L3 11Z" fill="#d8e5b4"/><path d="m3 14 15 8v17L3 31Z" fill="#a9c28d"/><path d="m22 22 15-8v17l-15 8Z" fill="#788f68"/></svg><div>Voxcel My Room<small>PHOTO GARDEN <span> / MVP 01</span></small></div></div>
+  <div class="top-actions"><span id="save-status" class="save-status">この端末に保存</span><button id="import-scene" class="quiet" title="箱庭JSONを読み込む"><span data-icon="folder"></span><span class="wide-label">読み込む</span></button><button id="export-scene" class="soft"><span data-icon="save"></span><span class="wide-label">箱庭を書き出す</span></button><button id="help-open" class="icon-button" title="使い方">?</button></div>
+</header>
+<main class="workspace">
+  <aside class="library panel"><div class="eyebrow">YOUR COLLECTION</div><div class="heading-row"><h2>集めたもの</h2><span id="asset-count" class="count">6</span></div><p class="muted intro">日常のかけらを、この部屋に。</p><button id="new-photo" class="primary wide"><span data-icon="plus"></span>写真からつくる</button><div class="two-buttons" style="margin-top:8px"><button id="import-voxel" class="soft"><span data-icon="folder"></span>Voxel JSONを追加</button><button id="open-five-view" class="soft"><span data-icon="cube"></span>5面図ツール</button></div><div class="library-tabs"><button id="filter-all" class="active">すべて</button><button id="filter-photo">写真から</button></div><div id="asset-library" class="asset-grid"></div><button id="try-sample" class="sample-try"><span data-icon="spark"></span><span>まずはサンプルで体験<small>画像 → ボクセル → 箱庭</small></span><span>↗</span></button><div class="library-foot"><span class="privacy-dot"></span>写真はブラウザ内で処理します</div></aside>
+  <section class="studio"><div class="studio-heading"><div><div class="eyebrow">MY LITTLE WORLD</div><input id="room-name" value="小さな日常" maxlength="64" aria-label="箱庭の名前"></div><div class="studio-heading-right"><span class="live-badge">LOCAL STUDIO</span><button id="export-image" class="quiet" title="箱庭をPNG画像に保存"><span data-icon="image"></span>PNG</button></div></div>
+    <div id="room-stage" class="room-stage"><div class="stage-meta"><span>12 × 12 <span class="muted">/</span> <span id="instance-count">6 OBJECTS</span></span><div class="segmented"><button id="style-cubes" class="active">面で描く</button><button id="style-dots">ドットで描く</button></div></div><canvas id="room-canvas" tabindex="0" aria-label="箱庭。素材をクリックして選択、ドラッグで移動。矢印キーでも移動できます。"></canvas><div class="stage-tip"><span data-icon="cursor"></span>選んで、動かして、好きな場所へ。</div></div>
+    <div class="viewbar"><div class="button-group"><button id="undo" class="icon-button" title="元に戻す (Ctrl+Z)"><span data-icon="undo"></span></button><button id="redo" class="icon-button" title="やり直す (Ctrl+Shift+Z)"><span data-icon="redo"></span></button></div><div class="view-controls"><button id="view-left" class="icon-button" title="視点を左に回転">↶</button><span id="view-angle">35°</span><button id="view-right" class="icon-button" title="視点を右に回転">↷</button><span class="divider"></span><button id="zoom-out" class="icon-button" title="カメラを引く">−</button><button id="view-reset" class="zoom-label" title="視点をリセット">100%</button><button id="zoom-in" class="icon-button" title="カメラを近づける">＋</button></div><label class="snap"><input id="snap-grid" type="checkbox" checked>マスに揃える</label></div>
+    <footer class="flow-footer"><span>REAL LIFE → LITTLE WORLD</span><div>写真 <i>→</i> 切り抜き <i>→</i> ボクセル <i>→</i> ドット <i>→</i> 箱庭</div></footer>
+  </section>
+  <aside class="inspector panel"><div class="eyebrow">OBJECT DETAILS</div><h2>ものの設定</h2><div id="nothing-selected" class="empty-selection"><span data-icon="cube"></span><p>ひとつ、選んでみよう。</p><small>部屋のものをクリックすると<br>向きや大きさを変えられます。</small></div><section id="selection-panel" hidden><div class="selected-preview checker"><canvas id="selected-canvas" width="96" height="96"></canvas></div><h3 id="selected-name"></h3><p id="selected-meta" class="muted small"></p><label class="control-label">向き <output id="object-angle">0°</output></label><div class="two-buttons"><button id="rotate-object-left"><span data-icon="undo"></span>−45°</button><button id="rotate-object-right">＋45°<span data-icon="redo"></span></button></div><label class="control-label" for="scale-range">大きさ <output id="scale-value">1.0×</output></label><input id="scale-range" type="range" min="0.4" max="2.5" step="0.1" value="1"><div class="position-fields"><label>X<input id="object-x" type="number" min="-5.8" max="5.8" step="0.25"></label><label>Z<input id="object-z" type="number" min="-5.8" max="5.8" step="0.25"></label></div><div class="two-buttons action-row"><button id="duplicate-object"><span data-icon="copy"></span>複製</button><button id="delete-object" class="danger"><span data-icon="trash"></span>削除</button></div></section>
+    <section class="world-settings"><div class="eyebrow">ART DIRECTION</div><h3>部屋の見え方</h3><div class="theme-options"><button data-theme="sand" class="theme active" title="砂色の床" aria-label="砂色の床"></button><button data-theme="moss" class="theme" title="草色の床" aria-label="草色の床"></button><button data-theme="night" class="theme" title="夜色の床" aria-label="夜色の床"></button></div><label class="check-row">輪郭をくっきり<input id="outline-toggle" type="checkbox" checked></label><label class="check-row">足もとに影<input id="shadow-toggle" type="checkbox" checked></label><label class="check-row">陰影の段階<select id="lighting-levels"><option value="3">3 段階</option><option value="4" selected>4 段階</option><option value="5">5 段階</option></select></label><p class="small muted">正投影・有限階調・ドット保持拡大。<br>素材を並べても、同じ絵柄に。</p></section><button id="reset-room" class="reset-link">サンプルの箱庭に戻す</button>
+  </aside>
+</main>
+<dialog id="creator" class="creator"><header class="dialog-header"><div><div class="eyebrow">CREATE AN OBJECT</div><h2>写真を、小さな素材に。</h2></div><button id="creator-close" class="icon-button" aria-label="閉じる">×</button></header><div id="creation-status" class="creation-status" role="status">写真を選ぶか、サンプル画像で始めましょう。</div><div class="creation-columns">
+  <section class="creation-step"><h3><span>01</span>写真を選ぶ</h3><div id="source-stage" class="image-stage source-stage"><canvas id="source-canvas" hidden></canvas><div id="source-empty"><span data-icon="camera"></span><strong>いつものものを、ひとつ。</strong><small>ここに写真をドロップ<br>PNG / JPEG / WebP / AVIF · 20 MBまで</small></div></div><div class="two-buttons"><button id="choose-photo"><span data-icon="image"></span>写真を選ぶ</button><button id="take-photo"><span data-icon="camera"></span>撮影</button></div><button id="load-sample" class="text-button">サンプルのマグ画像を使う ↗</button><p class="small muted">正面寄り・背景と色が違うものがおすすめ。<br>切り抜き済みの透過PNGも使えます。</p></section>
+  <section class="creation-step"><h3><span>02</span>被写体を切り抜く</h3><div class="image-stage checker"><canvas id="mask-canvas" width="256" height="256" aria-label="切り抜き編集。ブラシまたは背景クリックで調整。"></canvas></div><div class="mask-tools"><button data-tool="wand" class="active" title="クリックした背景色を消す">背景を消す</button><button data-tool="erase">消す</button><button data-tool="restore">戻す</button><button data-tool="keep">これだけ</button></div><div class="brush-row"><label for="brush-size">ブラシ</label><input id="brush-size" type="range" min="2" max="48" value="14"><button id="mask-undo" class="icon-button" title="切り抜きを1つ戻す">↶</button></div><div class="two-buttons"><button id="quick-cutout">単色背景を抜く</button><button id="ai-cutout" class="ai-button">✧ AIで切り抜く</button></div><label class="control-label" for="tolerance">背景色の許容幅 <output id="tolerance-value">30</output></label><input id="tolerance" type="range" min="5" max="90" value="30"></section>
+  <section class="creation-step output-step"><h3><span>03</span>ボクセルをドットに</h3><div class="image-stage checker output-stage"><canvas id="voxel-preview" width="128" height="128"></canvas><span id="method-badge" class="method-badge">簡易立体化</span></div><div class="preview-toolbar"><button id="preview-left" class="icon-button" title="素材を左に回転">↶</button><span id="preview-angle">22.5°</span><button id="preview-right" class="icon-button" title="素材を右に回転">↷</button><select id="preview-style" aria-label="素材の描画方式"><option value="cubes">面で描く</option><option value="dots">ドットで描く</option></select><button id="export-asset" class="icon-button" title="素材を透過PNGで保存"><span data-icon="image"></span></button></div><div class="conversion-settings"><label>細かさ<select id="voxel-resolution"><option value="16">16</option><option value="24">24</option><option value="32" selected>32</option><option value="48">48</option></select></label><label>色数<select id="palette-count"><option value="8">8色</option><option value="16" selected>16色</option><option value="24">24色</option><option value="32">32色</option></select></label><label>描画<select id="render-resolution"><option value="64">64px</option><option value="96">96px</option><option value="128" selected>128px</option></select></label></div><label class="control-label" for="voxel-thickness">奥行き・厚み <output id="thickness-value">55%</output></label><input id="voxel-thickness" type="range" min="10" max="100" value="55"><div class="two-buttons"><button id="quick-depth" class="active">輪郭から立体化</button><button id="ai-depth" class="ai-button">✧ AIで深度推定</button></div><div class="voxel-info"><span id="voxel-stats">— VOXELS</span><div id="palette-swatches"></div></div></section>
+</div><div class="creation-note"><span>!</span>簡易モードは輪郭から厚みを補完します。AI深度も見えている面の推定です。裏側の正確な復元ではありません。<button id="cancel-ai" hidden>AI処理を中止</button></div><footer class="creator-footer"><label>素材の名前<input id="asset-name" maxlength="40" placeholder="例：お気に入りのマグ"></label><div><button id="creator-cancel" class="quiet">キャンセル</button><button id="place-created" class="primary" disabled><span data-icon="plus"></span>素材を箱庭に置く</button></div></footer></dialog>
+<dialog id="help-dialog" class="help-dialog"><header class="dialog-header"><h2>小さな世界のつくり方</h2><button id="help-close" class="icon-button" aria-label="閉じる">×</button></header><h3>写真 → 切り抜き → ボクセル → 箱庭</h3><p>「写真からつくる」で写真を選び、消す・戻すブラシで被写体を整えます。細かさ・色数・厚みを調整して「素材を箱庭に置く」。左のコレクションをクリックすると同じ素材をもう一度置けます。</p><h3>操作</h3><p>部屋のものをドラッグして移動。矢印キーで微調整、Rキーで回転、Deleteで削除。Ctrl / ⌘ + Zで元に戻せます。向き・大きさは右のパネルでも変更できます。</p><h3>保存とプライバシー</h3><p>箱庭はこのブラウザの保存領域に自動保存します。ブラウザのデータ削除で消えるため「箱庭を書き出す」でJSONを保管してください。写真そのものは保存・送信せず、色付きボクセルを保存します。</p><h3>AIと簡易モードの違い</h3><p>簡易切り抜きは背景色を見て消す処理です。複雑な背景にはブラシかAI切り抜きを使ってください。AIは任意で、初回は外部から実行ライブラリとモデルをダウンロードし、端末内で処理します。切り抜きモデルは約224 MB、深度モデルは約27 MBに加え実行環境の通信が発生します。端末・回線によって時間やメモリを要します。利用料やAPIキーは不要です。</p><p>写真1枚から裏側を正確に復元する機能はありません。顔の専用補正・人物アバター・ARはこのMVPには含みません。サンプル家具は手続き生成、サンプルマグ画像は合成画像です。</p><p class="small muted">描画の参考：yurashu2-droid / VoxcelMyRoom。AI：BiRefNet_lite-ONNX (MIT)、Depth Anything V2 Small (Apache-2.0)、Transformers.js (Apache-2.0)。</p></dialog>
+<div id="toast" class="toast" role="status" aria-live="polite"></div>
+<input id="photo-file" type="file" accept="image/png,image/jpeg,image/webp,image/avif" hidden><input id="camera-file" type="file" accept="image/*" capture="environment" hidden><input id="scene-file" type="file" accept="application/json,.json" hidden><input id="voxel-file" type="file" accept="application/json,.json" hidden>
+<script type="module">const __modules = {};
+// src/core.mjs
+__modules["core"] = (() => {
+/** Pure image-to-voxel processing. No browser, graphics, network or AI dependencies. */
+const clamp = (v, lo, hi) => Math.max(lo, Math.min(hi, v));
+const hex = rgb => '#' + rgb.map(v => clamp(Math.round(v),0,255).toString(16).padStart(2,'0')).join('');
+const rgb = s => [parseInt(s.slice(1,3),16),parseInt(s.slice(3,5),16),parseInt(s.slice(5,7),16)];
+const distance = (a,b) => Math.hypot(a[0]-b[0],a[1]-b[1],a[2]-b[2]);
+const pixel = (im,i) => im.data.subarray(i*4,i*4+3);
+function checkImage(im) {
+  if(!im || !Number.isInteger(im.width)||!Number.isInteger(im.height)||im.width<1||im.height<1||im.width*im.height>1048576||im.data?.length!==im.width*im.height*4) throw new Error('画像サイズが不正です。');
+}
+/** Preserve supplied transparency; otherwise erase only border-connected corner colors. */
+function removeBackground(im,tolerance=30) {
+  checkImage(im);const {width:w,height:h,data}=im, n=w*h;
+  const mask=Uint8Array.from({length:n},(_,i)=>data[i*4+3]);
+  if(mask.some(a=>a<240)) return mask;
+  const corners=[0,w-1,(h-1)*w,n-1].map(i=>pixel(im,i));
+  const seen=new Uint8Array(n), queue=new Int32Array(n);let head=0,tail=0;
+  const add=i=>{if(seen[i])return;seen[i]=1;if(data[i*4+3]<128||corners.some(c=>distance(pixel(im,i),c)<=clamp(tolerance,0,150)*1.732)){mask[i]=0;queue[tail++]=i;}};
+  for(let x=0;x<w;x++){add(x);add((h-1)*w+x);}for(let y=0;y<h;y++){add(y*w);add(y*w+w-1);}
+  while(head<tail){const i=queue[head++],x=i%w,y=(i/w)|0;if(x)add(i-1);if(x<w-1)add(i+1);if(y)add(i-w);if(y<h-1)add(i+w);}
+  return mask;
+}
+function floodErase(im,mask,x,y,tolerance=30) {
+  const {width:w,height:h}=im;x=clamp(Math.floor(x),0,w-1);y=clamp(Math.floor(y),0,h-1);
+  const target=pixel(im,y*w+x),seen=new Uint8Array(w*h),queue=[y*w+x];seen[queue[0]]=1;
+  for(let q=0;q<queue.length;q++){
+    const i=queue[q];if(distance(pixel(im,i),target)>tolerance*1.732)continue;mask[i]=0;
+    const px=i%w,py=(i/w)|0;
+    for(const j of [px?i-1:-1,px<w-1?i+1:-1,py?i-w:-1,py<h-1?i+w:-1])if(j>=0&&!seen[j]){seen[j]=1;queue.push(j);}
+  }
+}
+function paintMask(mask,w,h,x,y,r,value) {
+  for(let py=Math.max(0,Math.floor(y-r));py<=Math.min(h-1,Math.ceil(y+r));py++)
+    for(let px=Math.max(0,Math.floor(x-r));px<=Math.min(w-1,Math.ceil(x+r));px++)
+      if((px-x)**2+(py-y)**2<=r*r)mask[py*w+px]=value;
+}
+function keepComponent(mask,w,h,x,y) {
+  const start=clamp(Math.floor(y),0,h-1)*w+clamp(Math.floor(x),0,w-1), out=new Uint8Array(mask.length);
+  if(mask[start]<128)return mask.slice();
+  const q=[start];out[start]=mask[start];
+  for(let k=0;k<q.length;k++){
+    const i=q[k],px=i%w,py=(i/w)|0;
+    for(const j of [px?i-1:-1,px<w-1?i+1:-1,py?i-w:-1,py<h-1?i+w:-1])if(j>=0&&!out[j]&&mask[j]>=128){out[j]=mask[j];q.push(j);}
+  }return out;
+}
+function maskBounds(mask,w,h) {
+  let x0=w,y0=h,x1=-1,y1=-1;
+  for(let y=0;y<h;y++)for(let x=0;x<w;x++)if(mask[y*w+x]>=128){x0=Math.min(x0,x);y0=Math.min(y0,y);x1=Math.max(x1,x);y1=Math.max(y1,y);}
+  if(x1<0)throw new Error('被写体が空です。残すブラシで被写体を戻してください。');
+  return {x:x0,y:y0,width:x1-x0+1,height:y1-y0+1};
+}
+/** Weighted median-cut: one palette per asset, never an RGB channel count pretending to be a color budget. */
+function makePalette(colors,count=16) {
+  const hist=new Map();for(const c of colors){const key=c.map(v=>Math.round(v/8)*8).join(',');const e=hist.get(key);if(e)e.n++;else hist.set(key,{c:[...c],n:1});}
+  if(!hist.size)return [[128,128,128]];
+  const buckets=[[...hist.values()]],range=b=>[0,1,2].map(k=>Math.max(...b.map(e=>e.c[k]))-Math.min(...b.map(e=>e.c[k])));
+  while(buckets.length<count){
+    let bi=-1,score=-1,axis=0;
+    buckets.forEach((b,i)=>{if(b.length<2)return;const r=range(b),a=r.indexOf(Math.max(...r)),s=r[a]*Math.sqrt(b.reduce((n,e)=>n+e.n,0));if(s>score){score=s;bi=i;axis=a;}});
+    if(bi<0)break;
+    const b=buckets.splice(bi,1)[0].sort((a,b)=>a.c[axis]-b.c[axis]),half=b.reduce((n,e)=>n+e.n,0)/2;let sum=0,k=0;
+    while(k<b.length-1&&sum<half)sum+=b[k++].n;k=clamp(k,1,b.length-1);buckets.push(b.slice(0,k),b.slice(k));
+  }
+  return buckets.map(b=>{const n=b.reduce((s,e)=>s+e.n,0);return [0,1,2].map(k=>Math.round(b.reduce((s,e)=>s+e.c[k]*e.n,0)/n));});
+}
+function nearestColor(c,palette) {
+  let best=palette[0],d=Infinity;for(const p of palette){const v=(c[0]-p[0])**2*.3+(c[1]-p[1])**2*.5+(c[2]-p[2])**2*.2;if(v<d){d=v;best=p;}}return best;
+}
+function silhouetteDistance(occ,w,h) {
+  const W=w+2,H=h+2,d=new Float32Array(W*H);
+  for(let y=0;y<h;y++)for(let x=0;x<w;x++)d[(y+1)*W+x+1]=occ[y*w+x]?999:0;
+  for(let y=1;y<H-1;y++)for(let x=1;x<W-1;x++){const i=y*W+x;if(d[i])d[i]=Math.min(d[i],d[i-1]+1,d[i-W]+1,d[i-W-1]+1.414,d[i-W+1]+1.414);}
+  for(let y=H-2;y>0;y--)for(let x=W-2;x>0;x--){const i=y*W+x;if(d[i])d[i]=Math.min(d[i],d[i+1]+1,d[i+W]+1,d[i+W-1]+1.414,d[i+W+1]+1.414);}
+  return Float32Array.from({length:w*h},(_,i)=>d[(Math.floor(i/w)+1)*W+i%w+1]);
+}
+/** Converts a cutout into a filled volume. Depth maps use [0,1], larger = nearer.
+ * Silhouette mode is rounded extrusion; it does NOT infer the unseen side of an object.
+ */
+function voxelize(im,mask,options={},depth=null) {
+  checkImage(im);if(mask?.length!==im.width*im.height)throw new Error('マスクのサイズが一致しません。');
+  if(depth&&(!Number.isInteger(depth.width)||!Number.isInteger(depth.height)||depth.width<1||depth.height<1||depth.data?.length!==depth.width*depth.height||[...depth.data].some(v=>!Number.isFinite(v))))throw new Error('深度 depth データが不正です。');
+  const resolution=clamp(Math.round(Number(options.resolution)||32),16,48), thickness=clamp(Number(options.thickness)||.55,.1,1), count=clamp(Math.round(Number(options.colors)||16),4,32);
+  const bounds=maskBounds(mask,im.width,im.height), ratio=resolution/Math.max(bounds.width,bounds.height),w=Math.max(1,Math.round(bounds.width*ratio)),h=Math.max(1,Math.round(bounds.height*ratio));
+  const occ=new Uint8Array(w*h),samples=new Array(w*h),depths=new Float32Array(w*h),paletteInput=[];
+  for(let y=0;y<h;y++)for(let x=0;x<w;x++){
+    const xa=bounds.x+Math.floor(x*bounds.width/w),xb=bounds.x+Math.max(Math.floor((x+1)*bounds.width/w),Math.floor(x*bounds.width/w)+1),ya=bounds.y+Math.floor(y*bounds.height/h),yb=bounds.y+Math.max(Math.floor((y+1)*bounds.height/h),Math.floor(y*bounds.height/h)+1);
+    let weight=0,r=0,g=0,b=0,ds=0;
+    for(let sy=ya;sy<yb;sy++)for(let sx=xa;sx<xb;sx++){
+      const i=sy*im.width+sx,a=mask[i]/255*(im.data[i*4+3]/255);if(a<.2)continue;
+      weight+=a;r+=im.data[i*4]*a;g+=im.data[i*4+1]*a;b+=im.data[i*4+2]*a;
+      if(depth){const dx=clamp(Math.floor(sx/im.width*depth.width),0,depth.width-1),dy=clamp(Math.floor(sy/im.height*depth.height),0,depth.height-1);ds+=clamp(depth.data[dy*depth.width+dx],0,1)*a;}
+    }
+    const i=y*w+x;if(weight/((xb-xa)*(yb-ya))<.2)continue;occ[i]=1;samples[i]=[r/weight,g/weight,b/weight];paletteInput.push(samples[i]);depths[i]=depth?ds/weight:0;
+  }
+  if(!paletteInput.length)throw new Error('被写体が細かすぎます。解像度を上げてください。');
+  const palette=makePalette(paletteInput,count),dist=silhouetteDistance(occ,w,h),maxD=Math.max(...dist),half=Math.max(1,Math.round(resolution*thickness*.35));
+  const depthsUsed=[...depths].filter((_,i)=>occ[i]).sort((a,b)=>a-b),low=depthsUsed[Math.floor(depthsUsed.length*.03)]||0,high=depthsUsed[Math.floor(depthsUsed.length*.97)]||1;
+  const voxels=[];
+  for(let y=0;y<h;y++)for(let x=0;x<w;x++){
+    const i=y*w+x;if(!occ[i])continue;
+    const shape=Math.sqrt(clamp(dist[i]/maxD,0,1)),back=-Math.max(0,Math.round(shape*half*.65));
+    const front=depth?Math.max(1,Math.round((.18+.82*clamp((depths[i]-low)/Math.max(.001,high-low),0,1))*half*1.5)):Math.max(1,Math.round(shape*half));
+    const color=hex(nearestColor(samples[i],palette));
+    for(let z=back;z<=front;z++)voxels.push({x,y:h-1-y,z,color});
+  }
+  const minZ=Math.min(...voxels.map(v=>v.z)),maxZ=Math.max(...voxels.map(v=>v.z));for(const v of voxels)v.z-=minZ;
+  if(voxels.length>60000)throw new Error('ボクセル数が上限を超えました。解像度か厚みを下げてください。');
+  return {size:[w,h,maxZ-minZ+1],voxels,palette:palette.map(hex),bounds,method:depth?'depth':'silhouette',settings:{resolution,thickness,colors:count}};
+}
+
+return {clamp,hex,rgb,removeBackground,floodErase,paintMask,keepComponent,maskBounds,makePalette,nearestColor,voxelize};
+})();
+
+// src/scene.mjs
+__modules["scene"] = (() => {
+const { clamp } = __modules["core"];
+const uid = () => globalThis.crypto?.randomUUID?.() || `v-${Date.now().toString(36)}-${Math.random().toString(36).slice(2,10)}`;
+class History {
+  constructor(limit=16){this.limit=limit;this.past=[];this.future=[];}
+  push(value){this.past.push(structuredClone(value));if(this.past.length>this.limit)this.past.shift();this.future=[];}
+  undo(current){if(!this.past.length)return null;this.future.push(structuredClone(current));return this.past.pop();}
+  redo(current){if(!this.future.length)return null;this.past.push(structuredClone(current));return this.future.pop();}
+  clear(){this.past=[];this.future=[];}
+}
+function prop(id,name,height,build) {
+  const map=new Map();
+  const set=(x,y,z,color)=>map.set(`${x},${y},${z}`,{x,y,z,color});
+  const box=(x,y,z,w,h,d,c)=>{for(let X=x;X<x+w;X++)for(let Y=y;Y<y+h;Y++)for(let Z=z;Z<z+d;Z++)set(X,Y,Z,c);};
+  const ball=(x,y,z,rx,ry,rz,c)=>{for(let X=Math.floor(x-rx);X<=x+rx;X++)for(let Y=Math.floor(y-ry);Y<=y+ry;Y++)for(let Z=Math.floor(z-rz);Z<=z+rz;Z++)if(((X-x)/rx)**2+((Y-y)/ry)**2+((Z-z)/rz)**2<=1)set(X,Y,Z,c);};
+  build({box,ball,set});const vs=[...map.values()],mn=[0,1,2].map((_,i)=>Math.min(...vs.map(v=>[v.x,v.y,v.z][i])));
+  const voxels=vs.map(v=>({...v,x:v.x-mn[0],y:v.y-mn[1],z:v.z-mn[2]}));
+  const size=['x','y','z'].map(k=>Math.max(...voxels.map(v=>v[k]))+1);
+  return {id,name,height,size,voxels,method:'sample',palette:[...new Set(voxels.map(v=>v.color))]};
+}
+function createSampleScene() {
+  const assets=[
+    prop('plant','きまぐれな観葉植物',2.8,({box,ball})=>{
+      box(4,0,4,7,1,7,'#bb684d');box(3,1,3,9,6,9,'#d98963');box(2,6,2,11,2,11,'#edab7b');box(3,8,3,9,1,9,'#554034');
+      box(7,9,7,1,13,1,'#536d40');box(4,11,7,4,1,1,'#557c44');box(7,15,7,5,1,1,'#557c44');
+      ball(3,13,7,4,3,2,'#8bbf67');ball(11,16,7,4,3,2,'#579c60');ball(7,20,7,3,4,2,'#a5cb70');ball(6,16,4,3,3,3,'#77ae57');
+    }),
+    prop('shelf','本と小さなもの',3.2,({box})=>{
+      box(0,0,0,2,25,7,'#d5a576');box(20,0,0,2,25,7,'#ba855f');box(0,0,0,22,2,7,'#d7ab7b');box(0,12,0,22,2,7,'#e4bc90');box(0,23,0,22,2,7,'#e4bc90');box(0,1,0,22,23,1,'#b78c68');
+      [[3,8,'#6d9b92'],[6,9,'#e2bd75'],[9,7,'#da8062'],[13,9,'#526d82'],[16,6,'#c5c8ad']].forEach(([x,h,c])=>box(x,2,2,2,h,4,c));
+      box(3,14,2,7,1,4,'#bc7961');box(3,15,2,7,1,4,'#ede0b5');box(3,16,2,7,1,4,'#8baa9c');box(13,14,2,5,6,3,'#d7aa7b');box(14,15,4,3,4,1,'#84aba0');
+    }),
+    prop('desk','考えごとのデスク',1.8,({box})=>{
+      for(const x of [1,22])for(const z of [1,10])box(x,0,z,2,11,2,'#b08059');box(0,10,0,25,2,13,'#dfb889');box(0,12,0,25,1,13,'#edcfa4');
+      box(8,13,4,10,1,6,'#7c918e');box(8,14,4,10,7,1,'#546968');box(9,15,5,8,5,1,'#accdc1');box(11,16,5,5,1,1,'#67988d');box(11,18,5,3,1,1,'#729f92');
+      box(3,13,8,3,3,3,'#e9e2ca');box(3,16,8,3,1,3,'#65554b');box(20,13,6,3,1,5,'#d58e77');
+    }),
+    prop('chair','ひと休みのチェア',1.9,({box})=>{
+      for(const x of [1,10])for(const z of [1,9])box(x,0,z,2,8,2,'#b78969');box(0,7,0,13,3,12,'#81988b');box(1,10,1,11,1,10,'#acb8a0');
+      box(0,10,0,13,9,2,'#9cac99');box(0,17,0,13,2,2,'#c0c5a9');box(0,10,2,1,2,8,'#9eac94');box(12,10,2,1,2,8,'#9eac94');
+    }),
+    prop('lamp','夕方のランプ',2.7,({box})=>{
+      box(3,0,3,9,1,9,'#606968');box(5,1,5,5,1,5,'#7e8580');box(7,2,7,1,20,1,'#9e9c80');
+      box(1,21,1,13,2,13,'#bd7353');box(2,23,2,11,3,11,'#e7aa72');box(3,26,3,9,3,9,'#f0c78e');box(4,29,4,7,1,7,'#f6deb2');
+    }),
+    prop('rug','やわらかなラグ',.07,({box})=>{
+      box(0,0,0,26,1,21,'#d69480');box(1,0,1,24,1,19,'#e1b59c');box(3,0,3,20,1,15,'#ecd0b0');
+      for(let x=4;x<23;x+=4)box(x,0,4,1,1,13,'#dfb99a');
+    }),
+  ];
+  // A rug is thin, but its horizontal scale must remain meaningful.
+  assets.find(a=>a.id==='rug').height=.14;
+  const make=(id,x,z,rotation=0,scale=1)=>({id:`placed-${id}`,assetId:id,x,z,rotation,scale});
+  return {version:1,name:'小さな日常',assets,instances:[make('rug',0,.7,0,1),make('shelf',-3.6,-3.8),make('desk',.2,-1.3),make('chair',-.5,2,180),make('lamp',3.7,-3),make('plant',3.6,2.5)],view:{yaw:35,pitch:30,zoom:1,style:'cubes',outline:true,shadow:true,levels:4,theme:'sand'}};
+}
+const validName=v=>typeof v==='string'&&v.trim().length>0&&v.length<=64&&!/[<>\u0000-\u001f]/.test(v);
+const finite=(v,a,b)=>typeof v==='number'&&Number.isFinite(v)&&v>=a&&v<=b;
+function validateScene(v) {
+  const bad=message=>{throw new Error(`箱庭データを読み込めません: ${message}`);};
+  if(!v||v.version!==1||!validName(v.name)||!Array.isArray(v.assets)||!Array.isArray(v.instances)||v.assets.length>32||v.instances.length>40)bad('形式・バージョン・上限を確認してください。');
+  const ids=new Set();let total=0;
+  for(const a of v.assets){
+    if(!a||!validName(a.id)||ids.has(a.id)||!validName(a.name)||!finite(a.height,.02,6)||!Array.isArray(a.size)||a.size.length!==3||a.size.some(n=>!Number.isInteger(n)||n<1||n>128)||!Array.isArray(a.voxels)||!a.voxels.length||a.voxels.length>60000)bad('素材の形式が不正です。');
+    if(!['sample','silhouette','depth'].includes(a.method))bad('素材の生成方式が不正です。');
+    ids.add(a.id);total+=a.voxels.length;const cells=new Set();
+    for(const p of a.voxels){if(!p||['x','y','z'].some((k,i)=>!Number.isInteger(p[k])||p[k]<0||p[k]>=a.size[i])||typeof p.color!=='string'||!/^#[\da-f]{6}$/i.test(p.color))bad('ボクセル座標・色が不正です。');const k=`${p.x},${p.y},${p.z}`;if(cells.has(k))bad('重複セルがあります。');cells.add(k);}
+  }
+  if(total>500000)bad('素材の合計が500,000セルを超えています。');
+  const used=new Set();let visible=0;
+  for(const p of v.instances){if(!p||!validName(p.id)||used.has(p.id)||!ids.has(p.assetId)||!finite(p.x,-6,6)||!finite(p.z,-6,6)||!finite(p.rotation,-3600,3600)||!finite(p.scale,.25,3))bad('配置情報が不正です。');used.add(p.id);visible+=v.assets.find(a=>a.id===p.assetId).voxels.length;}
+  if(visible>350000)bad('配置数が多すぎます。いくつか削除してください。');
+  const a=v.view;if(!a||!finite(a.yaw,-3600,3600)||!finite(a.pitch,10,70)||!finite(a.zoom,.5,2)||!['dots','cubes'].includes(a.style)||!['sand','moss','night'].includes(a.theme)||!Number.isInteger(a.levels)||!finite(a.levels,3,5)||typeof a.outline!=='boolean'||typeof a.shadow!=='boolean')bad('表示設定が不正です。');
+  // Construct known fields only. Imported arbitrary keys never become executable content.
+  return {version:1,name:v.name,assets:v.assets.map(a=>({id:a.id,name:a.name,height:a.height,size:[...a.size],voxels:a.voxels.map(p=>({x:p.x,y:p.y,z:p.z,color:p.color})),method:a.method,palette:[...new Set(a.voxels.map(p=>p.color))]})),instances:v.instances.map(p=>({id:p.id,assetId:p.assetId,x:p.x,z:p.z,rotation:p.rotation,scale:p.scale})),view:{yaw:a.yaw,pitch:a.pitch,zoom:a.zoom,style:a.style,outline:a.outline,shadow:a.shadow,levels:a.levels,theme:a.theme}};
+}
+function duplicateInstance(scene,id) {
+  const p=scene.instances.find(p=>p.id===id);if(!p)throw new Error('素材を選択してください。');
+  const copy={...p,id:uid(),x:clamp(p.x+.6,-5.8,5.8),z:clamp(p.z+.6,-5.8,5.8)};
+  const next={...scene,instances:[...scene.instances,copy]};validateScene(next);return copy;
+}
+
+return {uid,History,createSampleScene,validateScene,duplicateInstance};
+})();
+
+// src/render.mjs
+__modules["render"] = (() => {
+const { clamp, rgb } = __modules["core"];
+const rad=d=>d*Math.PI/180;
+const basis=v=>({s:Math.sin(rad(v.yaw)),c:Math.cos(rad(v.yaw)),sp:Math.sin(rad(v.pitch)),cp:Math.cos(rad(v.pitch))});
+function project(x,y,z,v) {const b=basis(v);return projectWith(x,y,z,v,b);}
+function projectWith(x,y,z,v,b){const q=x*b.s+z*b.c;return {x:v.cx+(x*b.c-z*b.s)*v.scale,y:v.cy+(q*b.sp-y*b.cp)*v.scale,z:q*b.cp+y*b.sp};}
+function unprojectGround(x,y,v) {const b=basis(v),u=(x-v.cx)/v.scale,q=(y-v.cy)/(v.scale*b.sp);return {x:u*b.c+q*b.s,z:-u*b.s+q*b.c};}
+function createRaster(width,height) {
+  return {width,height,data:new Uint8ClampedArray(width*height*4),depth:new Float32Array(width*height).fill(-Infinity),ids:new Int32Array(width*height).fill(-1)};
+}
+function put(r,x,y,z,color,id,alpha=255) {
+  if(x<0||y<0||x>=r.width||y>=r.height)return;const i=y*r.width+x;if(z<r.depth[i]-.0001)return;
+  r.depth[i]=z;r.ids[i]=id;const j=i*4;r.data[j]=color[0];r.data[j+1]=color[1];r.data[j+2]=color[2];r.data[j+3]=alpha;
+}
+function triangle(r,a,b,c,color,id) {
+  const area=(b.x-a.x)*(c.y-a.y)-(b.y-a.y)*(c.x-a.x);if(Math.abs(area)<.00001)return;
+  const x0=clamp(Math.floor(Math.min(a.x,b.x,c.x)),0,r.width-1),x1=clamp(Math.ceil(Math.max(a.x,b.x,c.x)),0,r.width-1),y0=clamp(Math.floor(Math.min(a.y,b.y,c.y)),0,r.height-1),y1=clamp(Math.ceil(Math.max(a.y,b.y,c.y)),0,r.height-1);
+  for(let y=y0;y<=y1;y++)for(let x=x0;x<=x1;x++){
+    const px=x+.5,py=y+.5,u=((b.x-px)*(c.y-py)-(b.y-py)*(c.x-px))/area,v=((c.x-px)*(a.y-py)-(c.y-py)*(a.x-px))/area,w=1-u-v;
+    if(u>=-.00001&&v>=-.00001&&w>=-.00001)put(r,x,y,u*a.z+v*b.z+w*c.z,color,id);
+  }
+}
+const FACES=[
+  {n:[1,0,0],p:[[.5,-.5,-.5],[.5,.5,-.5],[.5,.5,.5],[.5,-.5,.5]]},
+  {n:[-1,0,0],p:[[-.5,-.5,.5],[-.5,.5,.5],[-.5,.5,-.5],[-.5,-.5,-.5]]},
+  {n:[0,1,0],p:[[-.5,.5,-.5],[-.5,.5,.5],[.5,.5,.5],[.5,.5,-.5]]},
+  {n:[0,-1,0],p:[[-.5,-.5,.5],[-.5,-.5,-.5],[.5,-.5,-.5],[.5,-.5,.5]]},
+  {n:[0,0,1],p:[[.5,-.5,.5],[.5,.5,.5],[-.5,.5,.5],[-.5,-.5,.5]]},
+  {n:[0,0,-1],p:[[-.5,-.5,-.5],[-.5,.5,-.5],[.5,.5,-.5],[.5,-.5,-.5]]},
+];
+const surfaceCache=new WeakMap();
+function surface(asset) {
+  if(surfaceCache.has(asset))return surfaceCache.get(asset);
+  const cells=new Set(asset.voxels.map(v=>`${v.x},${v.y},${v.z}`)),result=[];
+  for(const v of asset.voxels){const faces=[];let normal=[0,0,0];FACES.forEach((f,i)=>{if(!cells.has(`${v.x+f.n[0]},${v.y+f.n[1]},${v.z+f.n[2]}`)){faces.push(i);normal=normal.map((n,k)=>n+f.n[k]);}});if(faces.length)result.push({...v,faces,normal});}
+  surfaceCache.set(asset,result);return result;
+}
+const dot=(a,b)=>a.reduce((s,n,i)=>s+n*b[i],0);
+const light=[-.38,.82,.43];
+function shade(color,normal,levels=4,enabled=true) {
+  const c=rgb(color);if(!enabled)return c;
+  const len=Math.hypot(...normal)||1,illum=.36+.64*Math.max(0,dot(normal,light)/len),band=Math.floor(clamp(illum,0,.999)*(levels))/(levels-1);
+  return c.map((v,i)=>Math.round((v*.48+[14,7,22][i])*(1-band)+v*band));
+}
+function transform(asset,instance) {
+  const unit=(asset.height||2)/asset.size[1]*instance.scale,s=Math.sin(rad(instance.rotation)),c=Math.cos(rad(instance.rotation)),mx=(asset.size[0]-1)/2,mz=(asset.size[2]-1)/2;
+  return {unit,normal:n=>[n[0]*c+n[2]*s,n[1],-n[0]*s+n[2]*c],point:(x,y,z)=>{x=(x-mx)*unit;z=(z-mz)*unit;return [instance.x+x*c+z*s,(y+.5)*unit,instance.z-x*s+z*c];}};
+}
+/** Software depth buffer keeps this MVP independent of GPU libraries and drivers.
+ * Dots follow the reference lab's center-to-grid snapping; cubes expose only visible faces.
+ */
+function drawAsset(r,asset,instance,view,settings={},id=0) {
+  const tr=transform(asset,instance),b=basis(view),cam=[b.s*b.cp,b.sp,b.c*b.cp],colors=new Map(),surf=surface(asset),step=Math.max(1,Math.round(tr.unit*view.scale*.9));
+  const colorFor=(v,n,key)=>{const k=v.color+':'+key;let c=colors.get(k);if(!c){c=shade(v.color,n,settings.levels||4,settings.lighting!==false);colors.set(k,c);}return c;};
+  for(const v of surf){
+    if(settings.style==='dots'){
+      const world=tr.point(v.x,v.y,v.z),p=projectWith(...world,view,b),n=tr.normal(v.normal),c=colorFor(v,n,v.normal.join(','));
+      const sx=Math.floor(p.x/step)*step,sy=Math.floor(p.y/step)*step;
+      for(let yy=0;yy<step;yy++)for(let xx=0;xx<step;xx++)put(r,sx+xx,sy+yy,p.z,c,id);
+    }else{
+      for(const fi of v.faces){const f=FACES[fi],n=tr.normal(f.n);if(dot(n,cam)<=.0001)continue;
+        const pts=f.p.map(p=>projectWith(...tr.point(v.x+p[0],v.y+p[1],v.z+p[2]),view,b)),c=colorFor(v,n,fi);
+        triangle(r,pts[0],pts[1],pts[2],c,id);triangle(r,pts[0],pts[2],pts[3],c,id);
+      }
+    }
+  }
+}
+function outlines(r,selected=-2) {
+  const {width:w,height:h,ids,data}=r,edges=[];
+  for(let y=1;y<h-1;y++)for(let x=1;x<w-1;x++){
+    const i=y*w+x,id=ids[i],neighbors=[i-1,i+1,i-w,i+w];
+    if(id<0){const near=neighbors.find(j=>ids[j]>=0);if(near!==undefined)edges.push([i,ids[near]===selected?[249,181,96]:[57,57,66],ids[near]]);}
+    else if(id===selected&&neighbors.some(j=>ids[j]!==id)){data[i*4]=244;data[i*4+1]=181;data[i*4+2]=101;}
+  }
+  for(const [i,c,id] of edges){data.set([...c,255],i*4);ids[i]=id;}
+}
+function shadows(r,assets,instances,view,onFloor) {
+  const coverage=new Uint8Array(r.width*r.height),b=basis(view);
+  for(const instance of instances){const a=assets.find(a=>a.id===instance.assetId);if(!a)continue;const tr=transform(a,instance),size=Math.max(1,Math.ceil(tr.unit*view.scale*.75));
+    for(const v of surface(a)){const [x,y,z]=tr.point(v.x,v.y,v.z),p=projectWith(x-light[0]/light[1]*y,.004,z-light[2]/light[1]*y,view,b),sx=Math.round(p.x),sy=Math.round(p.y),value=v.y<2?3:2;
+      for(let dy=-size;dy<=size;dy++)for(let dx=-size;dx<=size;dx++){const X=sx+dx,Y=sy+dy;if(X>=0&&Y>=0&&X<r.width&&Y<r.height){const i=Y*r.width+X;coverage[i]=Math.max(coverage[i],value);}}
+    }
+  }
+  const bayer=[0,2,3,1];
+  for(let i=0;i<coverage.length;i++)if(coverage[i]){const x=i%r.width,y=(i/r.width)|0;if(coverage[i]<3&&bayer[(y%2)*2+x%2]>=2)continue;const j=i*4;if(onFloor){if(!r.data[j+3])continue;for(let k=0;k<3;k++)r.data[j+k]*=coverage[i]===3?.69:.83;}else r.data.set([75,61,70,coverage[i]===3?90:55],j);}
+}
+const THEMES={sand:{floor:[226,207,174],line:[205,183,150],side:[161,125,97]},moss:{floor:[156,175,123],line:[140,160,108],side:[115,107,81]},night:{floor:[83,99,113],line:[74,88,103],side:[46,58,71]}};
+function board(r,view,theme) {
+  const b=basis(view),pr=(x,y,z)=>projectWith(x,y,z,view,b),side=theme.side;
+  const sides=[[[-6,0,6],[6,0,6],[6,-.34,6],[-6,-.34,6]],[[6,0,6],[6,0,-6],[6,-.34,-6],[6,-.34,6]],[[-6,0,-6],[-6,0,6],[-6,-.34,6],[-6,-.34,-6]],[[6,0,-6],[-6,0,-6],[-6,-.34,-6],[6,-.34,-6]]];
+  for(const s of sides){const p=s.map(v=>pr(...v));triangle(r,p[0],p[1],p[2],side,-1);triangle(r,p[0],p[2],p[3],side,-1);}
+  for(let y=0;y<r.height;y++)for(let x=0;x<r.width;x++){
+    const u=(x+.5-view.cx)/view.scale,q=(y+.5-view.cy)/(view.scale*b.sp),X=u*b.c+q*b.s,Z=-u*b.s+q*b.c;
+    if(Math.abs(X)>6||Math.abs(Z)>6)continue;
+    const edge=Math.abs(X)>5.94||Math.abs(Z)>5.94,grid=Math.abs(X-Math.round(X))<.014||Math.abs(Z-Math.round(Z))<.014;
+    put(r,x,y,q*b.cp,edge?theme.side:grid?theme.line:theme.floor,-1);
+  }
+}
+function renderRoom(scene,width=520,height=440,selectedId=null) {
+  const r=createRaster(width,height),view={...scene.view,scale:Math.min(width/18.5,height/14)*scene.view.zoom,cx:width/2,cy:height*.61};
+  board(r,view,THEMES[scene.view.theme]||THEMES.sand);
+  if(scene.view.shadow)shadows(r,scene.assets,scene.instances,view,true);
+  scene.instances.forEach((p,i)=>{const a=scene.assets.find(a=>a.id===p.assetId);if(a)drawAsset(r,a,p,view,scene.view,i);});
+  const selected=scene.instances.findIndex(p=>p.id===selectedId);
+  if(scene.view.outline)outlines(r,selected<0?-2:selected);
+  r.view=view;return r;
+}
+function renderAsset(asset,options={}) {
+  const resolution=options.resolution||128,r=createRaster(resolution,resolution),h=asset.height||2,unit=h/asset.size[1],diam=Math.hypot(asset.size[0]*unit,h,asset.size[2]*unit),pitch=options.pitch??22.5;
+  const scale=(resolution-14)/(diam*1.08),view={yaw:options.yaw??22.5,pitch,scale,cx:resolution/2,cy:resolution/2+h*.5*Math.cos(rad(pitch))*scale};
+  const p={id:'preview',assetId:asset.id,x:0,z:0,scale:1,rotation:0};
+  if(options.shadow)shadows(r,[asset],[p],view,false);
+  drawAsset(r,asset,p,view,{style:options.style||'cubes',lighting:options.lighting!==false,levels:options.levels||4},0);
+  if(options.outline)outlines(r);return r;
+}
+
+return {project,unprojectGround,createRaster,drawAsset,THEMES,renderRoom,renderAsset};
+})();
+
+// src/ai.mjs
+__modules["ai"] = (() => {
+/** Optional local inference. Models are downloaded only after an explicit user action.
+ * The photograph stays in a dedicated worker; no inference API/upload is used.
+ */
+function inferenceWorker() {
+  self.onmessage=async({data:job})=>{
+    try {
+      self.postMessage({kind:'progress',message:'AI実行環境を読み込んでいます…'});
+      const {env,RawImage,AutoModel,AutoProcessor,pipeline}=await import('https://cdn.jsdelivr.net/npm/@huggingface/transformers@3.7.2/dist/transformers.min.js');
+      env.allowLocalModels=false;env.backends.onnx.wasm.numThreads=1;
+      const progress_callback=p=>{if(p.status==='progress')self.postMessage({kind:'progress',message:`モデルを準備中 ${Math.round(p.progress||0)}% · ${String(p.file||'').split('/').pop()}`});};
+      const image=new RawImage(new Uint8ClampedArray(job.image.data),job.image.width,job.image.height,4).rgb();
+      let output;
+      if(job.task==='cutout'){
+        const modelId='onnx-community/BiRefNet_lite-ONNX';
+        const model=await AutoModel.from_pretrained(modelId,{dtype:'fp32',device:'wasm',progress_callback});
+        const processor=await AutoProcessor.from_pretrained(modelId);
+        self.postMessage({kind:'progress',message:'被写体を端末内で切り抜いています…'});
+        const {pixel_values}=await processor(image);
+        const {output_image}=await model({input_image:pixel_values});
+        output=await RawImage.fromTensor(output_image[0].sigmoid().mul(255).to('uint8')).resize(image.width,image.height);
+        await model.dispose();
+      }else{
+        const pipe=await pipeline('depth-estimation','onnx-community/depth-anything-v2-small',{dtype:'q8',device:'wasm',progress_callback});
+        self.postMessage({kind:'progress',message:'見えている面の相対的な奥行きを推定中…'});
+        const result=await pipe(image);output=await result.depth.resize(image.width,image.height);await pipe.dispose();
+      }
+      const values=Uint8Array.from({length:output.width*output.height},(_,i)=>output.data[i*output.channels]);
+      self.postMessage({kind:'result',width:output.width,height:output.height,data:values},[values.buffer]);
+    }catch(error){self.postMessage({kind:'error',message:error?.message||String(error)});}
+  };
+}
+function runAI(task,image,onProgress=()=>{}) {
+  const url=URL.createObjectURL(new Blob([`(${inferenceWorker.toString()})();`],{type:'text/javascript'}));
+  let worker,stop,rejectJob,ended=false;
+  const cleanup=()=>{ended=true;clearTimeout(stop);worker?.terminate();URL.revokeObjectURL(url);};
+  const promise=new Promise((resolve,reject)=>{
+    rejectJob=reject;
+    try{
+      worker=new Worker(url,{type:'module'});
+      worker.onmessage=({data})=>{if(data.kind==='progress')onProgress(data.message);else if(data.kind==='result'){cleanup();resolve(data);}else{cleanup();reject(new Error(`AI処理に失敗しました。モデル通信・メモリ・ブラウザ対応をご確認ください。簡易モードは引き続き使えます。 (${String(data.message).slice(0,150)})`));}};
+      worker.onerror=()=>{cleanup();reject(new Error('AIを読み込めませんでした。通信を確認するか、localhostで起動してください。簡易モードは通信なしで使えます。'));};
+      worker.postMessage({task,image});
+      stop=setTimeout(()=>{cleanup();reject(new Error('AI処理が3分を超えたため中止しました。簡易モード、またはPCでお試しください。'));},180000);
+    }catch(e){cleanup();reject(e);}
+  });
+  return {promise,cancel(){if(!ended){cleanup();rejectJob(new Error('AI処理を中止しました。現在の切り抜きは保持されています。'));}}};
+}
+
+return {runAI};
+})();
+
+// src/app.mjs
+__modules["app"] = (() => {
+const {clamp,removeBackground,floodErase,paintMask,keepComponent,voxelize} = __modules["core"];
+const {uid,History,createSampleScene,validateScene,duplicateInstance} = __modules["scene"];
+const {renderRoom,renderAsset,unprojectGround} = __modules["render"];
+const {runAI} = __modules["ai"];
+const $=id=>document.getElementById(id);
+const ICONS={plus:'M12 5v14M5 12h14',folder:'M3 7V5h6l2 2h10v13H3Z',save:'M5 3h12l4 4v14H3V3h2Zm2 0v7h10V3M7 21v-7h10v7',image:'M3 3h18v18H3ZM3 17l6-6 5 5 3-3 4 4M8 7h.01',camera:'M3 7h4l2-3h6l2 3h4v13H3Zm9 3a4 4 0 1 0 0 8 4 4 0 0 0 0-8',spark:'m12 3 2.5 6.5L21 12l-6.5 2.5L12 21l-2.5-6.5L3 12l6.5-2.5Z',cursor:'m4 3 6 18 3-7 7-3Z',undo:'M9 4 4 9l5 5M4 9h10a6 6 0 0 1 0 12',redo:'m15 4 5 5-5 5M20 9H10a6 6 0 0 0 0 12',cube:'m12 2 9 5v10l-9 5-9-5V7Zm-9 5 9 5 9-5M12 12v10',copy:'M8 8h13v13H8ZM16 8V3H3v13h5',trash:'M3 6h18M9 6V3h6v3M6 6l1 15h10l1-15M10 10v7M14 10v7'};
+function icon(name){return `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="${ICONS[name]||ICONS.cube}"/></svg>`;}
+for(const el of document.querySelectorAll('[data-icon]'))el.innerHTML=icon(el.dataset.icon);
+const STORE='voxcel-garden-v1',editHistory=new History(14);
+let garden=createSampleScene(),selected=null,filterPhotos=false,roomRaster=null,scheduled=false,persistTimer=null,toastTimer=null;
+let storageWarning='';
+try{const saved=localStorage.getItem(STORE);if(saved)garden=validateScene(JSON.parse(saved));}catch{storageWarning='自動保存を利用できません。JSON書き出しをご利用ください。';}
+function toast(message,error=false){$('toast').textContent=message;$('toast').className=`toast show${error?' error':''}`;clearTimeout(toastTimer);toastTimer=setTimeout(()=>$('toast').classList.remove('show'),5500);}
+function safeBind(id,fn){$(id).addEventListener('click',async()=>{try{await fn();}catch(e){toast(e.message||String(e),true);}});}
+function persist(){clearTimeout(persistTimer);try{localStorage.setItem(STORE,JSON.stringify(garden));storageWarning='';$('save-status').textContent='この端末に保存済み';$('save-status').classList.remove('warning');}catch{storageWarning='自動保存不可 · JSONを書き出してください';$('save-status').textContent=storageWarning;$('save-status').classList.add('warning');}}
+function saveSoon(){if(!storageWarning)$('save-status').textContent='保存中…';clearTimeout(persistTimer);persistTimer=setTimeout(persist,200);}
+function mutate(fn,rebuild=false){editHistory.push(garden);fn();refresh(rebuild);saveSoon();}
+function paintRaster(canvas,r){canvas.width=r.width;canvas.height=r.height;canvas.getContext('2d').putImageData(new ImageData(r.data,r.width,r.height),0,0);}
+function requestRoom(){if(scheduled)return;scheduled=true;requestAnimationFrame(()=>{scheduled=false;const stage=$('room-stage'),factor=stage.clientWidth>480&&stage.clientHeight>420?2:1,w=Math.max(200,Math.floor((stage.clientWidth-20)/factor)),h=Math.max(220,Math.floor((stage.clientHeight-70)/factor));roomRaster=renderRoom(garden,w,h,selected);const canvas=$('room-canvas');paintRaster(canvas,roomRaster);canvas.style.width=`${w*factor}px`;canvas.style.height=`${h*factor}px`;});}
+function selectedPair(){const p=garden.instances.find(p=>p.id===selected);return p?{p,a:garden.assets.find(a=>a.id===p.assetId)}:null;}
+function renderLibrary(){
+  const host=$('asset-library');host.replaceChildren();
+  for(const a of garden.assets.filter(a=>!filterPhotos||a.method!=='sample')){
+    const button=document.createElement('button');button.className='asset-card';button.dataset.assetId=a.id;button.title=`${a.name} を箱庭に配置`;
+    const thumb=document.createElement('span');thumb.className='asset-thumb';const canvas=document.createElement('canvas');thumb.append(canvas);paintRaster(canvas,renderAsset(a,{resolution:80,yaw:25,pitch:25,style:'cubes',outline:false}));
+    const label=document.createElement('span');label.className='asset-label';label.textContent=a.name;const kind=document.createElement('span');kind.className='asset-kind';kind.textContent=a.method==='sample'?'SAMPLE OBJECT':a.method==='depth'?'PHOTO / AI DEPTH':'PHOTO / QUICK';button.append(thumb,label,kind);
+    button.addEventListener('click',()=>{try{addExisting(a.id);}catch(e){toast(e.message,true);}});host.append(button);
+  }
+  if(!host.children.length){const text=document.createElement('p');text.className='small muted';text.style.gridColumn='1 / -1';text.textContent='写真からつくった素材がここに並びます。';host.append(text);}
+}
+function renderInspector(){
+  const pair=selectedPair();$('nothing-selected').hidden=!!pair;$('selection-panel').hidden=!pair;
+  for(const el of document.querySelectorAll('.asset-card'))el.classList.toggle('selected',pair?.a.id===el.dataset.assetId);
+  if(!pair)return;const {p,a}=pair;
+  $('selected-name').textContent=a.name;$('selected-meta').textContent=`${a.voxels.length.toLocaleString()} voxels · ${a.method==='sample'?'サンプル':a.method==='depth'?'AI深度':'簡易立体化'}`;
+  $('object-angle').textContent=`${((p.rotation%360)+360)%360}°`;$('scale-range').value=p.scale;$('scale-value').textContent=`${p.scale.toFixed(1)}×`;$('object-x').value=p.x.toFixed(2);$('object-z').value=p.z.toFixed(2);
+  paintRaster($('selected-canvas'),renderAsset(a,{resolution:96,yaw:garden.view.yaw-p.rotation,pitch:22.5,style:garden.view.style,outline:true}));
+}
+function refresh(rebuild=false){
+  $('asset-count').textContent=garden.assets.length;$('instance-count').textContent=`${garden.instances.length} OBJECTS`;$('room-name').value=garden.name;
+  $('undo').disabled=!editHistory.past.length;$('redo').disabled=!editHistory.future.length;
+  $('view-angle').textContent=`${Math.round((garden.view.yaw%360+360)%360)}°`;$('view-reset').textContent=`${Math.round(garden.view.zoom*100)}%`;
+  $('style-cubes').classList.toggle('active',garden.view.style==='cubes');$('style-dots').classList.toggle('active',garden.view.style==='dots');
+  $('outline-toggle').checked=garden.view.outline;$('shadow-toggle').checked=garden.view.shadow;$('lighting-levels').value=garden.view.levels;
+  document.querySelectorAll('[data-theme]').forEach(b=>b.classList.toggle('active',b.dataset.theme===garden.view.theme));
+  if(rebuild)renderLibrary();renderInspector();requestRoom();
+}
+function addExisting(assetId){
+  const p={id:uid(),assetId,x:0,z:0,scale:1,rotation:0};const candidate={...garden,instances:[...garden.instances,p]};validateScene(candidate);
+  mutate(()=>{garden.instances.push(p);selected=p.id;});toast('素材を置きました。ドラッグで移動できます。');
+}
+function changeObject(fn){const pair=selectedPair();if(!pair)return;mutate(()=>fn(pair.p));}
+function deleteSelected(){if(!selectedPair())return;mutate(()=>{garden.instances=garden.instances.filter(p=>p.id!==selected);selected=null;});}
+function undoEdit(){const s=editHistory.undo(garden);if(s){garden=s;selected=null;refresh(true);saveSoon();}}
+function redoEdit(){const s=editHistory.redo(garden);if(s){garden=s;selected=null;refresh(true);saveSoon();}}
+function download(blob,name){const url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download=name;document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),30000);}
+const fileName=name=>name.replace(/[\\/:*?"<>|\u0000-\u001f]/g,'_').slice(0,64)||'voxcel';
+function pngDownload(r,name,multiplier=2){const src=document.createElement('canvas');paintRaster(src,r);const dst=document.createElement('canvas');dst.width=r.width*multiplier;dst.height=r.height*multiplier;const ctx=dst.getContext('2d');ctx.imageSmoothingEnabled=false;ctx.drawImage(src,0,0,dst.width,dst.height);dst.toBlob(blob=>{if(blob)download(blob,name);else toast('PNGを書き出せませんでした。',true);},'image/png');}
+
+function normalizeImportedVoxelModel(raw,nameHint='5面図の素材'){
+  if(!raw||typeof raw!=='object')throw new Error('JSONの形式が不正です。');
+  const sourceVoxels=Array.isArray(raw.voxels)?raw.voxels:Array.isArray(raw.asset?.voxels)?raw.asset.voxels:null;
+  if(!sourceVoxels?.length)throw new Error('voxel配列が見つかりません。5面図ツールのJSONを書き出してください。');
+  const size=Array.isArray(raw.size)&&raw.size.length===3?raw.size:(Array.isArray(raw.meta?.dimensions)&&raw.meta.dimensions.length===3?raw.meta.dimensions:null);
+  const voxels=sourceVoxels.map(v=>({x:Number(v.x),y:Number(v.y),z:Number(v.z),color:String(v.color||'')}));
+  if(voxels.length>60000)throw new Error('素材が大きすぎます。60,000 voxel以下にしてください。');
+  if(voxels.some(v=>!Number.isInteger(v.x)||!Number.isInteger(v.y)||!Number.isInteger(v.z)||v.x<0||v.y<0||v.z<0||!/^#[\\da-f]{6}$/i.test(v.color)))throw new Error('voxel座標または色の形式が不正です。');
+  const derived=[0,1,2].map(i=>Math.max(...voxels.map(v=>[v.x,v.y,v.z][i]))+1);
+  const dims=(size||derived).map(n=>Math.max(1,Math.round(Number(n)||1)));
+  const cells=new Set();
+  for(const v of voxels){
+    if(v.x>=dims[0]||v.y>=dims[1]||v.z>=dims[2])throw new Error('size / dimensions と voxel座標が一致していません。');
+    const key=`${v.x},${v.y},${v.z}`;
+    if(cells.has(key))throw new Error('重複したvoxelがあります。');
+    cells.add(key);
+  }
+  const palette=[...new Set(voxels.map(v=>v.color))].slice(0,64);
+  const name=String(raw.name||raw.asset?.name||nameHint).replace(/[<>\\u0000-\\u001f]/g,'').trim().slice(0,40)||'5面図の素材';
+  const height=clamp(dims[1]/12,.14,4);
+  return {id:uid(),name,height,size:dims,voxels,palette,method:'silhouette'};
+}
+safeBind('export-scene',()=>{persist();download(new Blob([JSON.stringify(garden)],{type:'application/json'}),`${fileName(garden.name)}.voxcel.json`);toast('箱庭JSONを書き出しました。写真そのものは含まれません。');});
+safeBind('export-image',()=>pngDownload(renderRoom(garden,640,540,null),`${fileName(garden.name)}.png`,2));
+safeBind('import-scene',()=>$('scene-file').click());
+$('scene-file').addEventListener('change',async e=>{const file=e.target.files[0];e.target.value='';if(!file)return;try{if(file.size>40*1024*1024)throw new Error('箱庭ファイルは40 MB以下にしてください。');const loaded=validateScene(JSON.parse(await file.text()));mutate(()=>{garden=loaded;selected=null;},true);toast('箱庭を読み込みました。');}catch(e){toast(`読み込めませんでした。${e.message}`,true);}});
+
+safeBind('import-voxel',()=>$('voxel-file').click());
+safeBind('open-five-view',()=>window.open('./five-view.html','_blank','noopener'));
+$('voxel-file').addEventListener('change',async e=>{
+  const file=e.target.files[0];e.target.value='';if(!file)return;
+  try{
+    if(file.size>20*1024*1024)throw new Error('Voxel JSONは20 MB以下にしてください。');
+    const raw=JSON.parse(await file.text());
+    const asset=normalizeImportedVoxelModel(raw,file.name.replace(/\\.[^.]+$/,''));
+    const p={id:uid(),assetId:asset.id,x:1.8,z:2.8,rotation:garden.view.yaw,scale:1};
+    validateScene({...garden,assets:[...garden.assets,asset],instances:[...garden.instances,p]});
+    mutate(()=>{garden.assets.push(asset);garden.instances.push(p);selected=p.id;},true);
+    toast('5面図から作った素材を箱庭に追加しました。');
+  }catch(err){toast(`追加できませんでした。${err.message}`,true);}
+});
+safeBind('undo',undoEdit);safeBind('redo',redoEdit);safeBind('rotate-object-left',()=>changeObject(p=>p.rotation=(p.rotation-45+360)%360));safeBind('rotate-object-right',()=>changeObject(p=>p.rotation=(p.rotation+45)%360));
+safeBind('duplicate-object',()=>{const copy=duplicateInstance(garden,selected);mutate(()=>{garden.instances.push(copy);selected=copy.id;});toast('選んだ素材を複製しました。');});safeBind('delete-object',deleteSelected);
+$('scale-range').addEventListener('change',e=>changeObject(p=>p.scale=clamp(+e.target.value,.4,2.5)));
+for(const axis of ['x','z'])$(`object-${axis}`).addEventListener('change',e=>{const n=Number(e.target.value);if(Number.isFinite(n))changeObject(p=>p[axis]=clamp(n,-5.8,5.8));});
+$('room-name').addEventListener('change',e=>{const name=e.target.value.replace(/[<>\u0000-\u001f]/g,'').trim().slice(0,64)||'わたしの箱庭';mutate(()=>garden.name=name);});
+for(const style of ['cubes','dots'])safeBind(`style-${style}`,()=>mutate(()=>garden.view.style=style));
+for(const el of document.querySelectorAll('[data-theme]'))el.addEventListener('click',()=>mutate(()=>garden.view.theme=el.dataset.theme));
+$('outline-toggle').addEventListener('change',e=>mutate(()=>garden.view.outline=e.target.checked));$('shadow-toggle').addEventListener('change',e=>mutate(()=>garden.view.shadow=e.target.checked));$('lighting-levels').addEventListener('change',e=>mutate(()=>garden.view.levels=+e.target.value));
+safeBind('view-left',()=>mutate(()=>garden.view.yaw=(garden.view.yaw-45+360)%360));safeBind('view-right',()=>mutate(()=>garden.view.yaw=(garden.view.yaw+45)%360));safeBind('zoom-in',()=>mutate(()=>garden.view.zoom=clamp(garden.view.zoom+.1,.5,2)));safeBind('zoom-out',()=>mutate(()=>garden.view.zoom=clamp(garden.view.zoom-.1,.5,2)));safeBind('view-reset',()=>mutate(()=>{garden.view.yaw=35;garden.view.pitch=30;garden.view.zoom=1;}));
+safeBind('filter-all',()=>{filterPhotos=false;$('filter-all').classList.add('active');$('filter-photo').classList.remove('active');renderLibrary();renderInspector();});safeBind('filter-photo',()=>{filterPhotos=true;$('filter-photo').classList.add('active');$('filter-all').classList.remove('active');renderLibrary();renderInspector();});
+safeBind('reset-room',()=>{if(confirm('現在の箱庭をサンプルに戻します。必要なら先にJSONを書き出してください。元に戻す操作も使えます。'))mutate(()=>{garden=createSampleScene();selected=null;},true);});
+safeBind('help-open',()=>$('help-dialog').showModal());safeBind('help-close',()=>$('help-dialog').close());
+let drag=null;
+function rasterPointer(e,canvas){const b=canvas.getBoundingClientRect();return {x:(e.clientX-b.left)/b.width*canvas.width,y:(e.clientY-b.top)/b.height*canvas.height};}
+$('room-canvas').addEventListener('pointerdown',e=>{if(e.button!==0||!roomRaster)return;const canvas=$('room-canvas'),p=rasterPointer(e,canvas),idx=roomRaster.ids[Math.floor(p.y)*roomRaster.width+Math.floor(p.x)],item=garden.instances[idx];selected=item?.id||null;renderInspector();requestRoom();canvas.focus();if(item){const ground=unprojectGround(p.x,p.y,roomRaster.view);drag={id:item.id,startX:e.clientX,startY:e.clientY,dx:item.x-ground.x,dz:item.z-ground.z,committed:false};canvas.setPointerCapture(e.pointerId);}});
+$('room-canvas').addEventListener('pointermove',e=>{if(!drag||!roomRaster)return;if(!drag.committed&&Math.hypot(e.clientX-drag.startX,e.clientY-drag.startY)<3)return;const p=garden.instances.find(p=>p.id===drag.id);if(!p)return;if(!drag.committed){editHistory.push(garden);drag.committed=true;}const pos=rasterPointer(e,$('room-canvas')),q=unprojectGround(pos.x,pos.y,roomRaster.view),snap=$('snap-grid').checked?.25:.01; p.x=clamp(Math.round((q.x+drag.dx)/snap)*snap,-5.8,5.8);p.z=clamp(Math.round((q.z+drag.dz)/snap)*snap,-5.8,5.8);requestRoom();});
+function finishDrag(){if(drag?.committed){refresh();saveSoon();}drag=null;}
+$('room-canvas').addEventListener('pointerup',finishDrag);$('room-canvas').addEventListener('pointercancel',finishDrag);$('room-canvas').addEventListener('lostpointercapture',finishDrag);
+document.addEventListener('keydown',e=>{if(/INPUT|TEXTAREA|SELECT/.test(e.target.tagName))return;if($('creator').open||$('help-dialog').open)return;const key=e.key.toLowerCase();if((e.ctrlKey||e.metaKey)&&key==='z'){e.preventDefault();e.shiftKey?redoEdit():undoEdit();return;}if(key==='delete'||key==='backspace'){if(selected){e.preventDefault();deleteSelected();}}else if(key==='r')changeObject(p=>p.rotation=(p.rotation+45)%360);else if(['arrowleft','arrowright','arrowup','arrowdown'].includes(key)&&selected){e.preventDefault();changeObject(p=>{if(key==='arrowleft')p.x-=.25;if(key==='arrowright')p.x+=.25;if(key==='arrowup')p.z-=.25;if(key==='arrowdown')p.z+=.25;p.x=clamp(p.x,-5.8,5.8);p.z=clamp(p.z,-5.8,5.8);});}});
+// Creation workspace: images are temporary; only generated voxel data enters the garden.
+let sourceImage=null,sourceMask=null,sourceDepth=null,created=null,previewYaw=22.5,maskTool='wand',maskPast=[],paintStroke=null,generateTimer=null,aiJob=null,sourceSerial=0;
+function creationStatus(text,error=false,busy=false){$('creation-status').textContent=text;$('creation-status').className=`creation-status${error?' error':''}${busy?' busy':''}`;}
+function showCreator(){if(!$('creator').open)$('creator').showModal();requestAnimationFrame(()=>{fitPhotoCanvases();drawPreview();});}
+function closeCreator(){aiJob?.cancel();sourceSerial++;$('creator').close();}
+safeBind('new-photo',()=>{showCreator();$('photo-file').click();});safeBind('creator-close',closeCreator);safeBind('creator-cancel',closeCreator);$('creator').addEventListener('cancel',()=>{aiJob?.cancel();sourceSerial++;});
+safeBind('choose-photo',()=>$('photo-file').click());safeBind('take-photo',()=>$('camera-file').click());
+function fitPhotoCanvases(){if(!sourceImage)return;for(const id of ['source-canvas','mask-canvas']){const canvas=$(id),host=canvas.parentElement,scale=Math.min((host.clientWidth-2)/sourceImage.width,(host.clientHeight-2)/sourceImage.height);canvas.style.width=`${sourceImage.width*scale}px`;canvas.style.height=`${sourceImage.height*scale}px`;}}
+function drawMask(){if(!sourceImage)return;const data=new Uint8ClampedArray(sourceImage.data);for(let i=0;i<sourceMask.length;i++)data[i*4+3]=Math.min(sourceMask[i],sourceImage.data[i*4+3]);paintRaster($('mask-canvas'),{width:sourceImage.width,height:sourceImage.height,data});fitPhotoCanvases();}
+function acceptImage(im,name){sourceImage=im;sourceMask=removeBackground(im,+$('tolerance').value);sourceDepth=null;created=null;maskPast=[];previewYaw=22.5;$('asset-name').value=name.replace(/[<>\u0000-\u001f]/g,'').slice(0,40);$('source-canvas').hidden=false;$('source-empty').hidden=true;paintRaster($('source-canvas'),im);drawMask();generate();}
+async function loadPhoto(file){
+  if(!file)return;showCreator();aiJob?.cancel();const serial=++sourceSerial;const url=URL.createObjectURL(file);
+  try{
+    if(file.size>20*1024*1024)throw new Error('写真は20 MB以下にしてください。');if(file.type==='image/svg+xml')throw new Error('SVGは非対応です。PNG・JPEG・WebPにしてください。');
+    creationStatus('写真を読み込んでいます…');const image=new Image();image.src=url;await image.decode();if(serial!==sourceSerial)return;
+    const scale=Math.min(1,512/Math.max(image.naturalWidth,image.naturalHeight)),canvas=document.createElement('canvas');canvas.width=Math.max(1,Math.round(image.naturalWidth*scale));canvas.height=Math.max(1,Math.round(image.naturalHeight*scale));const ctx=canvas.getContext('2d',{willReadFrequently:true});ctx.drawImage(image,0,0,canvas.width,canvas.height);const data=ctx.getImageData(0,0,canvas.width,canvas.height);
+    acceptImage({width:data.width,height:data.height,data:data.data},file.name.replace(/\.[^.]+$/,''));
+  }catch(e){creationStatus(`読み込めませんでした。${e.message} JPEG・PNGでお試しください。`,true);}finally{URL.revokeObjectURL(url);}
+}
+for(const id of ['photo-file','camera-file'])$(id).addEventListener('change',e=>{const file=e.target.files[0];e.target.value='';loadPhoto(file);});
+const dropHost=$('source-stage');dropHost.addEventListener('dragover',e=>{e.preventDefault();dropHost.classList.add('dragover');});dropHost.addEventListener('dragleave',()=>dropHost.classList.remove('dragover'));dropHost.addEventListener('drop',e=>{e.preventDefault();dropHost.classList.remove('dragover');loadPhoto(e.dataTransfer.files[0]);});
+function sampleImage(){
+  const c=document.createElement('canvas');c.width=384;c.height=384;const x=c.getContext('2d');x.fillStyle='#f3efe6';x.fillRect(0,0,384,384);
+  // A procedurally drawn image fixture, not a photographic reconstruction or a prebuilt voxel.
+  const handle=x.createLinearGradient(255,0,338,0);handle.addColorStop(0,'#91aaa0');handle.addColorStop(.5,'#bed1c0');handle.addColorStop(1,'#76938a');x.lineWidth=21;x.strokeStyle=handle;x.beginPath();x.ellipse(275,210,49,53,0,0,Math.PI*2);x.stroke();
+  const g=x.createLinearGradient(90,0,273,0);g.addColorStop(0,'#67887e');g.addColorStop(.3,'#b6d0be');g.addColorStop(.68,'#a1bfae');g.addColorStop(1,'#638378');x.fillStyle=g;x.beginPath();x.moveTo(86,128);x.lineTo(99,288);x.bezierCurveTo(105,332,251,332,260,288);x.lineTo(273,128);x.closePath();x.fill();
+  x.fillStyle='#ccdbc7';x.beginPath();x.ellipse(179.5,128,93.5,30,0,0,Math.PI*2);x.fill();x.fillStyle='#566259';x.beginPath();x.ellipse(179.5,128,79,21,0,0,Math.PI*2);x.fill();x.fillStyle='#634a3b';x.beginPath();x.ellipse(179.5,133,72,15,0,0,Math.PI*2);x.fill();
+  x.fillStyle='#e2d7b8';for(let i=0;i<6;i++){const a=i*Math.PI/3;x.beginPath();x.ellipse(181+Math.cos(a)*19,232+Math.sin(a)*19,12,15,a,0,Math.PI*2);x.fill();}x.fillStyle='#be7950';x.beginPath();x.arc(181,232,12,0,Math.PI*2);x.fill();
+  const im=x.getImageData(0,0,384,384);return {width:384,height:384,data:im.data};
+}
+function useSample(){showCreator();aiJob?.cancel();sourceSerial++;acceptImage(sampleImage(),'花のマグ');creationStatus('合成サンプル画像です。取っ手の内側も「背景を消す」でクリックして調整できます。');}
+safeBind('try-sample',useSample);safeBind('load-sample',useSample);
+function rememberMask(){maskPast.push(sourceMask.slice());if(maskPast.length>12)maskPast.shift();$('mask-undo').disabled=false;}
+safeBind('mask-undo',()=>{if(maskPast.length){sourceMask=maskPast.pop();drawMask();scheduleGenerate();}$('mask-undo').disabled=!maskPast.length;});
+for(const button of document.querySelectorAll('[data-tool]'))button.addEventListener('click',()=>{maskTool=button.dataset.tool;document.querySelectorAll('[data-tool]').forEach(b=>{b.classList.toggle('active',b===button);b.setAttribute('aria-pressed',String(b===button));});});
+function brushAt(p){paintMask(sourceMask,sourceImage.width,sourceImage.height,p.x,p.y,+$('brush-size').value,maskTool==='restore'?255:0);}
+$('mask-canvas').addEventListener('pointerdown',e=>{if(!sourceImage||aiJob)return;e.preventDefault();rememberMask();const p=rasterPointer(e,$('mask-canvas'));if(maskTool==='wand')floodErase(sourceImage,sourceMask,p.x,p.y,+$('tolerance').value);else if(maskTool==='keep')sourceMask=keepComponent(sourceMask,sourceImage.width,sourceImage.height,p.x,p.y);else{brushAt(p);paintStroke=p;$('mask-canvas').setPointerCapture(e.pointerId);}drawMask();if(!paintStroke)scheduleGenerate();});
+$('mask-canvas').addEventListener('pointermove',e=>{if(!paintStroke)return;const p=rasterPointer(e,$('mask-canvas')),n=Math.max(1,Math.ceil(Math.hypot(p.x-paintStroke.x,p.y-paintStroke.y)/Math.max(1,+$('brush-size').value/2)));for(let i=1;i<=n;i++)brushAt({x:paintStroke.x+(p.x-paintStroke.x)*i/n,y:paintStroke.y+(p.y-paintStroke.y)*i/n});paintStroke=p;drawMask();});
+function finishPaint(){if(paintStroke){paintStroke=null;scheduleGenerate();}}
+$('mask-canvas').addEventListener('pointerup',finishPaint);$('mask-canvas').addEventListener('pointercancel',finishPaint);$('mask-canvas').addEventListener('lostpointercapture',finishPaint);
+safeBind('quick-cutout',()=>{if(!sourceImage)return;rememberMask();sourceMask=removeBackground(sourceImage,+$('tolerance').value);drawMask();generate();});
+$('tolerance').addEventListener('input',e=>$('tolerance-value').textContent=e.target.value);
+function scheduleGenerate(){clearTimeout(generateTimer);$('place-created').disabled=true;generateTimer=setTimeout(generate,180);}
+function generate(){
+  clearTimeout(generateTimer);if(!sourceImage||aiJob)return;
+  try{const options={resolution:+$('voxel-resolution').value,thickness:+$('voxel-thickness').value/100,colors:+$('palette-count').value};const model=voxelize(sourceImage,sourceMask,options,sourceDepth);created={...model,id:'draft',name:'draft',height:2.2};$('place-created').disabled=false;$('voxel-stats').textContent=`${model.voxels.length.toLocaleString()} VOXELS · ${model.palette.length} BASE COLORS`;$('palette-swatches').replaceChildren();model.palette.forEach(color=>{const s=document.createElement('span');s.style.background=color;$('palette-swatches').append(s);});$('method-badge').textContent=sourceDepth?'AI深度 + 裏側を補完':'簡易立体化 / 裏側は補完';$('quick-depth').classList.toggle('active',!sourceDepth);$('thickness-value').textContent=`${$('voxel-thickness').value}%`;drawPreview();creationStatus('プレビューを回して確認できます。被写体の輪郭が残っているか、小さな表示でもチェック。');}
+  catch(e){created=null;$('place-created').disabled=true;$('voxel-stats').textContent='— VOXELS';$('voxel-preview').getContext('2d').clearRect(0,0,$('voxel-preview').width,$('voxel-preview').height);creationStatus(e.message,true);}
+}
+function drawPreview(){if(!created)return;const res=+$('render-resolution').value,r=renderAsset(created,{resolution:res,yaw:previewYaw,pitch:15,style:$('preview-style').value,outline:true,shadow:true,levels:4});const canvas=$('voxel-preview');paintRaster(canvas,r);const host=canvas.parentElement,factor=Math.max(1,Math.floor(Math.min(host.clientWidth-12,host.clientHeight-22)/res));canvas.style.width=`${res*factor}px`;canvas.style.height=`${res*factor}px`;$('preview-angle').textContent=`${(previewYaw%360+360)%360}°`;}
+for(const id of ['voxel-resolution','palette-count'])$(id).addEventListener('change',scheduleGenerate);$('voxel-thickness').addEventListener('input',e=>{$('thickness-value').textContent=`${e.target.value}%`;scheduleGenerate();});for(const id of ['render-resolution','preview-style'])$(id).addEventListener('change',drawPreview);
+safeBind('preview-left',()=>{previewYaw=(previewYaw-22.5+360)%360;drawPreview();});safeBind('preview-right',()=>{previewYaw=(previewYaw+22.5)%360;drawPreview();});safeBind('quick-depth',()=>{sourceDepth=null;generate();});
+safeBind('export-asset',()=>{if(created)pngDownload(renderAsset(created,{resolution:+$('render-resolution').value,yaw:previewYaw,pitch:15,style:$('preview-style').value,outline:true,shadow:false}),`${fileName($('asset-name').value||'素材')}.png`,4);});
+async function applyAI(task){
+  if(!sourceImage||aiJob)return;
+  const size=task==='cutout'?'約224 MB':'約27 MB';
+  if(!confirm(`初回は${size}のAIモデルと実行環境をダウンロードします。写真の送信やAPI料金はありません。PCでの利用を推奨します。続けますか？`))return;
+  const serial=sourceSerial;$('creator').classList.add('processing');$('cancel-ai').hidden=false;$('place-created').disabled=true;creationStatus('AIを準備しています…',false,true);
+  const job=runAI(task,sourceImage,message=>creationStatus(message,false,true));aiJob=job;
+  try{const result=await job.promise;if(serial!==sourceSerial)return;if(task==='cutout'){rememberMask();sourceMask=new Uint8Array(result.data);drawMask();}else sourceDepth={width:result.width,height:result.height,data:Float32Array.from(result.data,v=>v/255)};aiJob=null;generate();creationStatus(task==='cutout'?'AIで被写体を切り抜きました。ブラシでも調整できます。':'AIの相対深度をボクセル化に反映しました。裏側は補完です。');}
+  catch(e){if(serial===sourceSerial)creationStatus(e.message,true);}
+  finally{if(aiJob===job)aiJob=null;$('creator').classList.remove('processing');$('cancel-ai').hidden=true;$('place-created').disabled=!created;}
+}
+safeBind('ai-cutout',()=>applyAI('cutout'));safeBind('ai-depth',()=>applyAI('depth'));safeBind('cancel-ai',()=>aiJob?.cancel());
+safeBind('place-created',()=>{
+  if(!created)return;const name=$('asset-name').value.replace(/[<>\u0000-\u001f]/g,'').trim().slice(0,40)||'写真からの素材';
+  const asset={id:uid(),name,height:2.2,size:[...created.size],voxels:created.voxels,palette:created.palette,method:created.method};const p={id:uid(),assetId:asset.id,x:1.8,z:2.8,rotation:garden.view.yaw,scale:1};
+  validateScene({...garden,assets:[...garden.assets,asset],instances:[...garden.instances,p]});
+  mutate(()=>{garden.assets.push(asset);garden.instances.push(p);selected=p.id;},true);closeCreator();toast('写真からの素材を置きました。自分だけの部屋に育てていきましょう。');
+});
+new ResizeObserver(()=>{requestRoom();if($('creator').open){fitPhotoCanvases();drawPreview();}}).observe($('room-stage'));
+window.addEventListener('beforeunload',()=>{if(persistTimer)persist();});
+if(storageWarning){$('save-status').textContent='自動保存不可 · JSONを利用';$('save-status').classList.add('warning');}
+refresh(true);
+
+return {};
+})();</script>
+</body></html>
