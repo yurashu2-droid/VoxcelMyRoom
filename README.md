@@ -19,6 +19,8 @@ npm run dev
 
 サイト内では生成後に **箱庭に追加** を押すと、`postMessage` で親画面へ安全に渡し、モーダルを閉じてその場で既存のPixel Artレンダラーに新しいVoxel素材を追加します。単独ツールでは **箱庭へ送る** として同一オリジンの一時ストレージ経由で `/` に戻ります。5面図ツール単体で確認したい場合は、`JSONを書き出す` でデータを保存できます。ブラウザをまたぐ共有やサーバーへのアップロードは行いません。
 
+各面は初期状態で元画像の縦横比を保持します。調整欄の **縦横比** は100%が元比率で、値を上げると横長、下げると縦長になります。自動整列ボタンで元比率へ戻せます。
+
 この接続は `src/voxel/modelTransfer.ts` の検証付きデータ橋渡しと `src/fiveViewBridge.ts` に分離しています。将来 `.vox`、写真切り抜き、Room Scanを追加する場合も、同じ `VoxelObject` 形式へ変換して渡せます。
 
 ```sh
@@ -67,6 +69,7 @@ npm run preview  # distのローカル確認
 ```text
 src/
   voxel/types.ts               Voxel / VoxelObjectの公開データ型
+  fiveViewAspect.ts            5面図候補を元比率で正方形キャンバスへ収める計算
   voxel/generators.ts          重複セルを上書きする簡単なboxビルダーと配色
   scenes/desk.ts               デスク、PC、椅子、植物
   scenes/room.ts               床、2枚の壁、ベッド、机、PC、棚、植物

@@ -9,6 +9,7 @@ import {
   FIVE_VIEW_MESSAGE_TYPE,
   isFiveViewModelMessage,
 } from "../src/voxel/fiveViewMessage";
+import { fitSourceToSquare } from "../src/fiveViewAspect";
 import type { VoxelObject } from "../src/voxel/types";
 
 const output = document.querySelector<HTMLPreElement>("#output")!;
@@ -63,6 +64,17 @@ assert(
 assert(
   "Messages from another shape are rejected",
   !isFiveViewModelMessage({ type: FIVE_VIEW_MESSAGE_TYPE, model: null }),
+);
+
+const wideFit = fitSourceToSquare(400, 200, 256);
+const tallFit = fitSourceToSquare(200, 400, 256);
+assert(
+  "Wide source images keep their aspect ratio",
+  wideFit.width === 256 && wideFit.height === 128,
+);
+assert(
+  "Tall source images keep their aspect ratio",
+  tallFit.width === 128 && tallFit.height === 256,
 );
 
 output.textContent = lines.join("\n");

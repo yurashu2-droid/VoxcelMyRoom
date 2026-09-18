@@ -103,14 +103,18 @@
         <input id="scale" type="range" min="70" max="140" step="1" value="100" />
       </div>
       <div>
+        <label>縦横比 <span id="av" class="small mono"></span></label>
+        <input id="aspect" type="range" min="50" max="200" step="1" value="100" />
+      </div>
+      <div>
         <label>反転</label>
         <button class="btn" id="flipBtn">左右反転 OFF</button>
       </div>
-      <div>
-        <label>&nbsp;</label>
-        <button class="btn" id="centerRole">この面を自動整列</button>
-      </div>
     </div>
+    <div class="row">
+      <button class="btn" id="centerRole">この面を自動整列（元比率）</button>
+    </div>
+    <div class="hint">縦横比100%は元画像の比率です。値を上げると横長、下げると縦長になります。</div>
 
     <h2>6. 3D構築</h2>
     <label>解像度プリセット</label>
@@ -143,6 +147,7 @@
   </section>
 </main>
 <script type="module" src="./src/fiveViewBridge.ts"></script>
+<script type="module" src="./src/fiveViewAspect.ts"></script>
 <script>
 (() => {
 const DEMO_SRC = './five-view-demo.svg';
@@ -184,6 +189,7 @@ function updateLabels(){
   els.xv.textContent = t ? Math.round(t.x) : '-';
   els.yv.textContent = t ? Math.round(t.y) : '-';
   els.sv.textContent = t ? (t.scale*100).toFixed(0) + '%' : '-';
+  els.av.textContent = t ? ((t.aspect ?? 1)*100).toFixed(0) + '%' : '-';
 }
 
 function initRoleUI(){
@@ -219,6 +225,7 @@ function syncRoleControls(){
   els.offsetX.value = Math.round(t.x);
   els.offsetY.value = Math.round(t.y);
   els.scale.value = Math.round(t.scale*100);
+  els.aspect.value = Math.round((t.aspect ?? 1)*100);
   els.flipBtn.textContent = `左右反転 ${t.flip ? 'ON' : 'OFF'}`;
   updateLabels();
 }
@@ -273,11 +280,12 @@ els.saveNet.addEventListener('click', () => {
   const url = els.netCanvas.toDataURL('image/png');
   const a = document.createElement('a'); a.href = url; a.download = 'fiveview_net.png'; a.click();
 });
-['offsetX','offsetY','scale'].forEach(id => els[id].addEventListener('input', () => {
+['offsetX','offsetY','scale','aspect'].forEach(id => els[id].addEventListener('input', () => {
   const t = state.transforms[state.activeRole]; if(!t) return;
   t.x = +els.offsetX.value;
   t.y = +els.offsetY.value;
   t.scale = +els.scale.value / 100;
+  t.aspect = +els.aspect.value / 100;
   updateLabels(); drawNet(); renderFinalViews();
 }));
 els.flipBtn.addEventListener('click', () => {
@@ -504,10 +512,9 @@ function renderAssignmentUI(){
 }
 
 function defaultTransformFor(role){
-  // The original successful prototype normalized each tight view directly
-  // to its target projection. Keep that behavior as the neutral state.
-  // Manual transforms are small corrections *after* normalization.
-  return {x:0,y:0,scale:1,flip:false};
+  // Keep each tight view's natural width/height ratio by default.
+  // Manual transforms are small corrections after this aspect-preserving fit.
+  return {x:0,y:0,scale:1,aspect:1,flip:false};
 }
 function autoFitRole(role){
   state.transforms[role] = defaultTransformFor(role);
@@ -523,26 +530,21 @@ function renderTransformedCandidateToCanvas(role){
   const cand = state.candidates[idx];
   const t = state.transforms[role] || defaultTransformFor(role);
 
-  // Stage 1: reproduce the first prototype's behavior: the tight object crop
-  // is normalized to the full canonical projection. This intentionally lets
-  // X/Y scale independently; reconstruction later maps it to X×Y / Z×Y / X×Z.
-  const canonical = document.createElement('canvas');
-  canonical.width=NORM; canonical.height=NORM;
-  const cc = canonical.getContext('2d');
-  cc.clearRect(0,0,NORM,NORM);
-  cc.drawImage(cand.canvas, 0,0,NORM,NORM);
-
-  // Stage 2: optional manual registration around the canonical center.
+  // Fit the tight crop into the canonical square without changing its ratio.
+  // The aspect slider is the only intentional horizontal stretch/compression.
+  const fitSourceToSquare = window.voxcelFiveViewAspect;
+  if(!fitSourceToSquare) return null;
+  const fitted = fitSourceToSquare(cand.canvas.width,cand.canvas.height,NORM,t.scale,t.aspect ?? 1);
   const c = document.createElement('canvas'); c.width=NORM; c.height=NORM;
   const ctx = c.getContext('2d');
   ctx.clearRect(0,0,NORM,NORM);
-  const w=NORM*t.scale, h=NORM*t.scale;
-  const x=(NORM-w)/2+t.x, y=(NORM-h)/2+t.y;
+  const w=fitted.width, h=fitted.height;
+  const x=fitted.x+t.x, y=fitted.y+t.y;
   if(t.flip){
     ctx.save(); ctx.translate(x+w,y); ctx.scale(-1,1);
-    ctx.drawImage(canonical,0,0,w,h); ctx.restore();
+    ctx.drawImage(cand.canvas,0,0,w,h); ctx.restore();
   } else {
-    ctx.drawImage(canonical,x,y,w,h);
+    ctx.drawImage(cand.canvas,x,y,w,h);
   }
   // Do not dilate again here: candidate extraction already did it once.
   const mk = makeMaskFromCanvas(c, false);
